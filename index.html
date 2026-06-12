@@ -573,8 +573,9 @@
       <div class="max-w-7xl mx-auto px-6 lg:px-8 py-12">
         <div class="flex flex-col md:flex-row items-center justify-between gap-6">
           <a href="#" class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-ow-orange to-ow-orange-light flex items-center justify-center">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0A0E17" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            <div id="footer-logo-container" class="w-8 h-8 rounded-lg bg-gradient-to-br from-ow-orange to-ow-orange-light flex items-center justify-center overflow-hidden relative">
+              <svg id="footer-logo-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0A0E17" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              <img id="footer-logo-img" class="absolute inset-0 w-full h-full object-cover hidden" src="" alt="页脚Logo" />
             </div>
             <span class="font-display font-bold text-sm tracking-wider text-white/80">鱿点<span class="text-ow-orange">猫饼</span></span>
           </a>
@@ -592,10 +593,21 @@
 
     <!-- 视频预览渲染脚本 -->
     <script>
-      (function() {
+      (async function() {
         const PREVIEW_KEY = 'ydmb_videos';
+        const API_BASE = window.location.origin;
 
-        function loadVideos() {
+        async function loadVideos() {
+          // 优先从服务端 API 加载
+          try {
+            const resp = await fetch(API_BASE + '/api/videos');
+            if (resp.ok) {
+              return await resp.json();
+            }
+          } catch (e) {
+            console.warn('预览加载视频列表失败，回退到 localStorage:', e);
+          }
+          // 降级：localStorage
           try {
             const data = localStorage.getItem(PREVIEW_KEY);
             return data ? JSON.parse(data) : [];
@@ -662,8 +674,8 @@
           return canvas.toDataURL('image/jpeg', 0.8);
         }
 
-        function renderPreview() {
-          const videos = loadVideos();
+        async function renderPreview() {
+          const videos = await loadVideos();
           const grid = document.getElementById('preview-video-grid');
           const empty = document.getElementById('preview-empty-state');
 
@@ -708,7 +720,7 @@
           }).join('');
         }
 
-        renderPreview();
+        await renderPreview();
       })();
     </script>
 
@@ -750,45 +762,48 @@
         </div>
         <!-- 内容 -->
         <div class="p-6 space-y-5">
-          <!-- Logo 上传 -->
+          <!-- 战队 Logo 图片选择 -->
           <div>
-            <label class="block text-sm font-medium text-white/80 mb-2">战队 Logo 图片</label>
+            <label class="block text-sm font-medium text-white/80 mb-2">战队 Logo 图片 <span class="text-ow-dark-muted text-xs ml-1">（从 img 文件夹选择）</span></label>
             <div id="logo-edit-preview" class="logo-preview-area aspect-video rounded-xl border border-ow-dark-border flex items-center justify-center overflow-hidden mb-3">
               <div id="logo-edit-placeholder" class="text-center">
                 <svg class="w-12 h-12 text-ow-dark-muted mx-auto mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                <span class="text-xs text-ow-dark-muted">点击下方按钮上传图片</span>
+                <span class="text-xs text-ow-dark-muted">从下方图库中选择图片</span>
               </div>
               <img id="logo-edit-preview-img" class="w-full h-full object-contain hidden" src="" alt="预览" />
             </div>
-            <div class="flex items-center gap-3">
-              <label class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-ow-dark-border text-sm text-white/70 hover:border-ow-orange/40 hover:text-ow-orange transition-all cursor-pointer">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                上传图片
-                <input type="file" id="logo-edit-file" accept="image/*" class="hidden" onchange="handleLogoFileSelect(event)" />
-              </label>
-              <button id="logo-edit-clear-btn" onclick="clearLogoPreview()" class="px-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition-colors hidden cursor-pointer">清除</button>
-            </div>
+            <div id="logo-img-gallery" class="img-gallery grid grid-cols-5 gap-1.5 max-h-36 overflow-y-auto rounded-lg border border-ow-dark-border p-2 bg-[#0A0E17]"></div>
+            <button id="logo-edit-clear-btn" onclick="clearLogoSelection()" class="mt-2 px-3 py-1.5 rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition-colors hidden cursor-pointer">清除选择</button>
           </div>
           <!-- 分隔线 -->
           <div class="divider-gradient"></div>
-          <!-- 导航栏图标上传 -->
+          <!-- 导航栏图标选择 -->
           <div>
-            <label class="block text-sm font-medium text-white/80 mb-2">导航栏小图标</label>
+            <label class="block text-sm font-medium text-white/80 mb-2">导航栏小图标 <span class="text-ow-dark-muted text-xs ml-1">（从 img 文件夹选择）</span></label>
             <div id="nav-logo-edit-preview" class="logo-preview-area aspect-square rounded-xl border border-ow-dark-border flex items-center justify-center overflow-hidden mb-3" style="max-width:120px;">
               <div id="nav-logo-edit-placeholder" class="text-center">
                 <svg class="w-8 h-8 text-ow-dark-muted mx-auto mb-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                <span class="text-xs text-ow-dark-muted">建议上传正方形图片</span>
+                <span class="text-xs text-ow-dark-muted">从下方图库中选择</span>
               </div>
               <img id="nav-logo-edit-preview-img" class="w-full h-full object-cover hidden" src="" alt="导航栏图标预览" />
             </div>
-            <div class="flex items-center gap-3">
-              <label class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-ow-dark-border text-sm text-white/70 hover:border-ow-orange/40 hover:text-ow-orange transition-all cursor-pointer">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                上传图标
-                <input type="file" id="nav-logo-edit-file" accept="image/*" class="hidden" onchange="handleNavLogoFileSelect(event)" />
-              </label>
-              <button id="nav-logo-edit-clear-btn" onclick="clearNavLogoPreview()" class="px-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition-colors hidden cursor-pointer">清除</button>
+            <div id="nav-logo-img-gallery" class="img-gallery grid grid-cols-5 gap-1.5 max-h-36 overflow-y-auto rounded-lg border border-ow-dark-border p-2 bg-[#0A0E17]"></div>
+            <button id="nav-logo-edit-clear-btn" onclick="clearNavLogoSelection()" class="mt-2 px-3 py-1.5 rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition-colors hidden cursor-pointer">清除选择</button>
+          </div>
+          <!-- 分隔线 -->
+          <div class="divider-gradient"></div>
+          <!-- 页脚图标选择 -->
+          <div>
+            <label class="block text-sm font-medium text-white/80 mb-2">页脚小图标 <span class="text-ow-dark-muted text-xs ml-1">（从 img 文件夹选择）</span></label>
+            <div id="footer-logo-edit-preview" class="logo-preview-area aspect-square rounded-xl border border-ow-dark-border flex items-center justify-center overflow-hidden mb-3" style="max-width:80px;">
+              <div id="footer-logo-edit-placeholder" class="text-center">
+                <svg class="w-6 h-6 text-ow-dark-muted mx-auto mb-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <span class="text-[10px] text-ow-dark-muted">从下方图库中选择</span>
+              </div>
+              <img id="footer-logo-edit-preview-img" class="w-full h-full object-cover hidden" src="" alt="页脚图标预览" />
             </div>
+            <div id="footer-logo-img-gallery" class="img-gallery grid grid-cols-5 gap-1.5 max-h-36 overflow-y-auto rounded-lg border border-ow-dark-border p-2 bg-[#0A0E17]"></div>
+            <button id="footer-logo-edit-clear-btn" onclick="clearFooterLogoSelection()" class="mt-2 px-3 py-1.5 rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition-colors hidden cursor-pointer">清除选择</button>
           </div>
           <!-- 直播间地址 -->
           <div>
@@ -836,9 +851,23 @@
       function isAdmin() { const s = getSession(); return s && s.role==='admin'; }
       function getCurrUser() { return getSession(); }
 
-      // 从 users.txt 解析用户数据
+      // 从 API 获取用户数据（服务端模式）或回退到 users.txt
       async function loadUsersFromFile() {
         if (_cachedUsers) return _cachedUsers;
+        try {
+          const resp = await fetch(API_BASE + '/api/users');
+          if (resp.ok) {
+            const users = await resp.json();
+            _cachedUsers = users.map((u, idx) => ({
+              id: 'u_' + idx + '_' + u.username,
+              username: u.username,
+              password: u.password,
+              role: u.role === 'admin' ? 'admin' : 'member'
+            }));
+            return _cachedUsers;
+          }
+        } catch (e) { /* 回退 */ }
+
         try {
           const resp = await fetch(USERS_TXT_URL);
           if (!resp.ok) throw new Error('无法加载用户数据文件');
@@ -847,7 +876,7 @@
           const lines = text.split(/\r?\n/);
           lines.forEach((line, idx) => {
             line = line.trim();
-            if (!line || line.startsWith('#')) return; // 跳过空行和注释
+            if (!line || line.startsWith('#')) return;
             const parts = line.split(',');
             if (parts.length >= 3) {
               users.push({
@@ -998,20 +1027,25 @@
           try { return JSON.parse(localStorage.getItem(AVATAR_KEY) || '{}'); } catch(e) { return {}; }
         }
 
+        function getAvatarSrc(dataOrFile) {
+          if (!dataOrFile) return '';
+          if (dataOrFile.startsWith('data:')) return dataOrFile;
+          return 'img/' + dataOrFile;
+        }
+
         function loadRosterAvatars() {
           const avatars = getSavedAvatars();
-          // 遍历所有带 data-member 属性的头像容器
           const containers = document.querySelectorAll('[data-member]');
           containers.forEach(container => {
             const name = container.getAttribute('data-member');
-            const dataURL = avatars[name];
-            if (!dataURL) return;
+            const data = avatars[name];
+            if (!data) return;
 
-            // 显示自定义头像图片，隐藏默认 SVG
             const img = container.querySelector('img.roster-avatar-img');
             const svg = container.querySelector('.roster-avatar-svg');
-            if (img) {
-              img.src = dataURL;
+            const src = getAvatarSrc(data);
+            if (img && src) {
+              img.src = src;
               img.classList.remove('hidden');
             }
             if (svg) {
@@ -1026,17 +1060,77 @@
 
     <!-- Logo & 直播间配置 -->
     <script>
-        const SITE_CONFIG_KEY = 'ydmb_site_config';
+        // ==========================================
+        //  img 文件夹可用图片列表
+        // ==========================================
+        const IMG_FILES = [
+          '76.png','amure.png','ana.png','aoreza.png','ash.png','bd.png',
+          'cj.jpg','dx.jpg','flower.png','genji.png','hutaodaifei.webp',
+          'irare.png','kiriko.png','lg.jpg','mcc.png','ow.jpg','ow2.jpg',
+          'ramatha.png','ruixi.png','suo.png','tracer.png','v.jpg',
+          'widowmaker.png','wisdom.png','wsq.jpg','wuyang.png','xh.jpg',
+          'xl.jpg','ydmb.jpg','yongjieqidong.jpg','youdianmaobt.jpg',
+          'zen.png','zhunuo.png','\u03a3.png'
+        ];
+
+        function getImgUrl(filename) {
+          return filename ? 'img/' + filename : '';
+        }
+
+        // ==========================================
+        //  SITE CONFIG（服务端存储，跨浏览器同步）
+        // ==========================================
+        const API_BASE = window.location.origin;
+
+        // 站点配置缓存（从服务端加载）
+        let siteConfigCache = {};
+
+        async function loadSiteConfig() {
+          try {
+            const resp = await fetch(API_BASE + '/api/config');
+            if (resp.ok) {
+              siteConfigCache = await resp.json();
+            }
+          } catch (e) {
+            // 服务不可用时回退 localStorage
+            try {
+              siteConfigCache = JSON.parse(localStorage.getItem('ydmb_site_config') || '{}');
+            } catch(e2) { siteConfigCache = {}; }
+          }
+        }
 
         function getSiteConfig() {
-          try { return JSON.parse(localStorage.getItem(SITE_CONFIG_KEY) || '{}'); } catch(e) { return {}; }
+          return siteConfigCache;
         }
 
-        function saveSiteConfig(config) {
-          localStorage.setItem(SITE_CONFIG_KEY, JSON.stringify(config));
+        async function saveSiteConfig(config) {
+          siteConfigCache = config;
+          try {
+            await fetch(API_BASE + '/api/config', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(config)
+            });
+          } catch (e) {
+            // 网络失败时回退 localStorage
+            localStorage.setItem('ydmb_site_config', JSON.stringify(config));
+          }
         }
 
-        // ======== 加载并应用 Logo 和直播间配置 ========
+        // 获取有效图片路径（支持新格式filename和旧格式dataURL）
+        function getEffectiveImgSrc(configKey) {
+          const config = getSiteConfig();
+          const val = config[configKey];
+          if (!val) return '';
+          // 如果是 dataURL（旧格式），直接返回
+          if (val.startsWith('data:')) return val;
+          // 新格式：文件名
+          return getImgUrl(val);
+        }
+
+        // ==========================================
+        //  加载并应用 Logo 和直播间配置
+        // ==========================================
 
         function applySiteConfig() {
           const config = getSiteConfig();
@@ -1046,8 +1140,9 @@
           const liveHint = document.getElementById('site-logo-live-hint');
 
           // 关于我们 Logo 图片
-          if (config.logoDataURL && logoImg) {
-            logoImg.src = config.logoDataURL;
+          const logoSrc = getEffectiveImgSrc('logoFile') || getEffectiveImgSrc('logoDataURL');
+          if (logoSrc && logoImg) {
+            logoImg.src = logoSrc;
             logoImg.classList.remove('hidden');
             if (placeholder) placeholder.classList.add('hidden');
           } else {
@@ -1056,16 +1151,9 @@
           }
 
           // 导航栏 Logo 图标
-          const navLogoImg = document.getElementById('nav-logo-img');
-          const navLogoSvg = document.getElementById('nav-logo-svg');
-          if (config.navLogoDataURL && navLogoImg) {
-            navLogoImg.src = config.navLogoDataURL;
-            navLogoImg.classList.remove('hidden');
-            if (navLogoSvg) navLogoSvg.classList.add('hidden');
-          } else {
-            if (navLogoImg) { navLogoImg.classList.add('hidden'); navLogoImg.src = ''; }
-            if (navLogoSvg) navLogoSvg.classList.remove('hidden');
-          }
+          applyNavLogo(getEffectiveImgSrc('navLogoFile') || getEffectiveImgSrc('navLogoDataURL'));
+          // 页脚 Logo 图标
+          applyFooterLogo(getEffectiveImgSrc('footerLogoFile'));
 
           // 直播间链接
           if (config.liveURL && link) {
@@ -1085,10 +1173,67 @@
           }
         }
 
-        // ======== Logo 编辑模态框 ========
+        function applyNavLogo(src) {
+          const navLogoImg = document.getElementById('nav-logo-img');
+          const navLogoSvg = document.getElementById('nav-logo-svg');
+          if (src && navLogoImg) {
+            navLogoImg.src = src;
+            navLogoImg.classList.remove('hidden');
+            if (navLogoSvg) navLogoSvg.classList.add('hidden');
+          } else {
+            if (navLogoImg) { navLogoImg.classList.add('hidden'); navLogoImg.src = ''; }
+            if (navLogoSvg) navLogoSvg.classList.remove('hidden');
+          }
+        }
 
-        let tempLogoDataURL = null;
-        let tempNavLogoDataURL = null;
+        function applyFooterLogo(src) {
+          const footerLogoImg = document.getElementById('footer-logo-img');
+          const footerLogoSvg = document.getElementById('footer-logo-svg');
+          if (src && footerLogoImg) {
+            footerLogoImg.src = src;
+            footerLogoImg.classList.remove('hidden');
+            if (footerLogoSvg) footerLogoSvg.classList.add('hidden');
+          } else {
+            if (footerLogoImg) { footerLogoImg.classList.add('hidden'); footerLogoImg.src = ''; }
+            if (footerLogoSvg) footerLogoSvg.classList.remove('hidden');
+          }
+        }
+
+        // ==========================================
+        //  图片库选择器工具函数
+        // ==========================================
+
+        function buildImgGallery(containerId, selectedFile, onSelect) {
+          const container = document.getElementById(containerId);
+          if (!container) return;
+          container.innerHTML = IMG_FILES.map(f => {
+            const sel = f === selectedFile ? 'ring-2 ring-ow-orange opacity-100' : 'opacity-60 hover:opacity-100';
+            return '<div class="gallery-item cursor-pointer rounded overflow-hidden border border-transparent hover:border-ow-orange/50 transition-all ' + sel + '" data-file="' + f + '" onclick="event.stopPropagation();arguments[0] && ' + onSelect.name + "('" + f + "')\"><img src=\"" + getImgUrl(f) + "\" class=\"w-full h-10 object-cover\" loading=\"lazy\" alt=\"" + f + "\" /></div>";
+          }).join('');
+        }
+
+        function setGallerySelection(containerId, filename) {
+          const container = document.getElementById(containerId);
+          if (!container) return;
+          container.querySelectorAll('.gallery-item').forEach(item => {
+            if (item.dataset.file === filename) {
+              item.classList.add('ring-2', 'ring-ow-orange');
+              item.classList.remove('opacity-60');
+              item.classList.add('opacity-100');
+            } else {
+              item.classList.remove('ring-2', 'ring-ow-orange', 'opacity-100');
+              item.classList.add('opacity-60');
+            }
+          });
+        }
+
+        // ==========================================
+        //  Logo 编辑模态框
+        // ==========================================
+
+        let tempLogoFile = undefined;
+        let tempNavLogoFile = undefined;
+        let tempFooterLogoFile = undefined;
 
         function openLogoEditModal() {
           const config = getSiteConfig();
@@ -1096,39 +1241,29 @@
           const urlInput = document.getElementById('logo-edit-url');
           const errEl = document.getElementById('logo-edit-error');
 
-          // ---- 战队 Logo 预览 ----
-          tempLogoDataURL = config.logoDataURL || null;
-          const previewImg = document.getElementById('logo-edit-preview-img');
-          const placeholder = document.getElementById('logo-edit-placeholder');
-          const clearBtn = document.getElementById('logo-edit-clear-btn');
+          // 战队 Logo - undefined 表示"未修改"，保存时跳过
+          const currentLogoFile = config.logoFile || '';
+          tempLogoFile = undefined;
+          updateLogoPreview(currentLogoFile);
+          buildImgGallery('logo-img-gallery', currentLogoFile, selectLogoFile);
+          const logoClearBtn = document.getElementById('logo-edit-clear-btn');
+          if (logoClearBtn) logoClearBtn.classList.toggle('hidden', !currentLogoFile);
 
-          if (config.logoDataURL && previewImg) {
-            previewImg.src = config.logoDataURL;
-            previewImg.classList.remove('hidden');
-            if (placeholder) placeholder.classList.add('hidden');
-            if (clearBtn) clearBtn.classList.remove('hidden');
-          } else {
-            if (previewImg) { previewImg.classList.add('hidden'); previewImg.src = ''; }
-            if (placeholder) placeholder.classList.remove('hidden');
-            if (clearBtn) clearBtn.classList.add('hidden');
-          }
-
-          // ---- 导航栏 Logo 预览 ----
-          tempNavLogoDataURL = config.navLogoDataURL || null;
-          const navPreviewImg = document.getElementById('nav-logo-edit-preview-img');
-          const navPlaceholder = document.getElementById('nav-logo-edit-placeholder');
+          // 导航栏 Logo - undefined 表示"未修改"，保存时跳过
+          const currentNavFile = config.navLogoFile || '';
+          tempNavLogoFile = undefined;
+          updateNavLogoPreview(currentNavFile);
+          buildImgGallery('nav-logo-img-gallery', currentNavFile, selectNavLogoFile);
           const navClearBtn = document.getElementById('nav-logo-edit-clear-btn');
+          if (navClearBtn) navClearBtn.classList.toggle('hidden', !currentNavFile);
 
-          if (config.navLogoDataURL && navPreviewImg) {
-            navPreviewImg.src = config.navLogoDataURL;
-            navPreviewImg.classList.remove('hidden');
-            if (navPlaceholder) navPlaceholder.classList.add('hidden');
-            if (navClearBtn) navClearBtn.classList.remove('hidden');
-          } else {
-            if (navPreviewImg) { navPreviewImg.classList.add('hidden'); navPreviewImg.src = ''; }
-            if (navPlaceholder) navPlaceholder.classList.remove('hidden');
-            if (navClearBtn) navClearBtn.classList.add('hidden');
-          }
+          // 页脚 Logo - undefined 表示"未修改"，保存时跳过
+          const currentFooterFile = config.footerLogoFile || '';
+          tempFooterLogoFile = undefined;
+          updateFooterLogoPreview(currentFooterFile);
+          buildImgGallery('footer-logo-img-gallery', currentFooterFile, selectFooterLogoFile);
+          const footerClearBtn = document.getElementById('footer-logo-edit-clear-btn');
+          if (footerClearBtn) footerClearBtn.classList.toggle('hidden', !currentFooterFile);
 
           if (urlInput) urlInput.value = config.liveURL || '';
           if (errEl) errEl.classList.add('hidden');
@@ -1137,6 +1272,93 @@
             modal.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
           }
+        }
+
+        function updateLogoPreview(filename) {
+          const previewImg = document.getElementById('logo-edit-preview-img');
+          const placeholder = document.getElementById('logo-edit-placeholder');
+          if (filename && previewImg) {
+            previewImg.src = getImgUrl(filename);
+            previewImg.classList.remove('hidden');
+            if (placeholder) placeholder.classList.add('hidden');
+          } else {
+            if (previewImg) { previewImg.classList.add('hidden'); previewImg.src = ''; }
+            if (placeholder) placeholder.classList.remove('hidden');
+          }
+        }
+
+        function updateNavLogoPreview(filename) {
+          const previewImg = document.getElementById('nav-logo-edit-preview-img');
+          const placeholder = document.getElementById('nav-logo-edit-placeholder');
+          if (filename && previewImg) {
+            previewImg.src = getImgUrl(filename);
+            previewImg.classList.remove('hidden');
+            if (placeholder) placeholder.classList.add('hidden');
+          } else {
+            if (previewImg) { previewImg.classList.add('hidden'); previewImg.src = ''; }
+            if (placeholder) placeholder.classList.remove('hidden');
+          }
+        }
+
+        function updateFooterLogoPreview(filename) {
+          const previewImg = document.getElementById('footer-logo-edit-preview-img');
+          const placeholder = document.getElementById('footer-logo-edit-placeholder');
+          if (filename && previewImg) {
+            previewImg.src = getImgUrl(filename);
+            previewImg.classList.remove('hidden');
+            if (placeholder) placeholder.classList.add('hidden');
+          } else {
+            if (previewImg) { previewImg.classList.add('hidden'); previewImg.src = ''; }
+            if (placeholder) placeholder.classList.remove('hidden');
+          }
+        }
+
+        function selectLogoFile(filename) {
+          tempLogoFile = filename;
+          setGallerySelection('logo-img-gallery', filename);
+          updateLogoPreview(filename);
+          const clearBtn = document.getElementById('logo-edit-clear-btn');
+          if (clearBtn) clearBtn.classList.toggle('hidden', !filename);
+        }
+
+        function selectNavLogoFile(filename) {
+          tempNavLogoFile = filename;
+          setGallerySelection('nav-logo-img-gallery', filename);
+          updateNavLogoPreview(filename);
+          const clearBtn = document.getElementById('nav-logo-edit-clear-btn');
+          if (clearBtn) clearBtn.classList.toggle('hidden', !filename);
+        }
+
+        function selectFooterLogoFile(filename) {
+          tempFooterLogoFile = filename;
+          setGallerySelection('footer-logo-img-gallery', filename);
+          updateFooterLogoPreview(filename);
+          const clearBtn = document.getElementById('footer-logo-edit-clear-btn');
+          if (clearBtn) clearBtn.classList.toggle('hidden', !filename);
+        }
+
+        function clearLogoSelection() {
+          tempLogoFile = null;
+          updateLogoPreview(null);
+          setGallerySelection('logo-img-gallery', null);
+          const clearBtn = document.getElementById('logo-edit-clear-btn');
+          if (clearBtn) clearBtn.classList.add('hidden');
+        }
+
+        function clearNavLogoSelection() {
+          tempNavLogoFile = null;
+          updateNavLogoPreview(null);
+          setGallerySelection('nav-logo-img-gallery', null);
+          const clearBtn = document.getElementById('nav-logo-edit-clear-btn');
+          if (clearBtn) clearBtn.classList.add('hidden');
+        }
+
+        function clearFooterLogoSelection() {
+          tempFooterLogoFile = null;
+          updateFooterLogoPreview(null);
+          setGallerySelection('footer-logo-img-gallery', null);
+          const clearBtn = document.getElementById('footer-logo-edit-clear-btn');
+          if (clearBtn) clearBtn.classList.add('hidden');
         }
 
         function closeLogoEditModal(event) {
@@ -1148,82 +1370,11 @@
           }
         }
 
-        function handleLogoFileSelect(event) {
-          const file = event.target.files[0];
-          if (!file) return;
-
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            tempLogoDataURL = e.target.result;
-
-            const previewImg = document.getElementById('logo-edit-preview-img');
-            const placeholder = document.getElementById('logo-edit-placeholder');
-            const clearBtn = document.getElementById('logo-edit-clear-btn');
-
-            if (previewImg) {
-              previewImg.src = tempLogoDataURL;
-              previewImg.classList.remove('hidden');
-            }
-            if (placeholder) placeholder.classList.add('hidden');
-            if (clearBtn) clearBtn.classList.remove('hidden');
-          };
-          reader.readAsDataURL(file);
-        }
-
-        function clearLogoPreview() {
-          tempLogoDataURL = null;
-          const previewImg = document.getElementById('logo-edit-preview-img');
-          const placeholder = document.getElementById('logo-edit-placeholder');
-          const clearBtn = document.getElementById('logo-edit-clear-btn');
-          const fileInput = document.getElementById('logo-edit-file');
-
-          if (previewImg) { previewImg.classList.add('hidden'); previewImg.src = ''; }
-          if (placeholder) placeholder.classList.remove('hidden');
-          if (clearBtn) clearBtn.classList.add('hidden');
-          if (fileInput) fileInput.value = '';
-        }
-
-        function handleNavLogoFileSelect(event) {
-          const file = event.target.files[0];
-          if (!file) return;
-
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            tempNavLogoDataURL = e.target.result;
-
-            const previewImg = document.getElementById('nav-logo-edit-preview-img');
-            const placeholder = document.getElementById('nav-logo-edit-placeholder');
-            const clearBtn = document.getElementById('nav-logo-edit-clear-btn');
-
-            if (previewImg) {
-              previewImg.src = tempNavLogoDataURL;
-              previewImg.classList.remove('hidden');
-            }
-            if (placeholder) placeholder.classList.add('hidden');
-            if (clearBtn) clearBtn.classList.remove('hidden');
-          };
-          reader.readAsDataURL(file);
-        }
-
-        function clearNavLogoPreview() {
-          tempNavLogoDataURL = null;
-          const previewImg = document.getElementById('nav-logo-edit-preview-img');
-          const placeholder = document.getElementById('nav-logo-edit-placeholder');
-          const clearBtn = document.getElementById('nav-logo-edit-clear-btn');
-          const fileInput = document.getElementById('nav-logo-edit-file');
-
-          if (previewImg) { previewImg.classList.add('hidden'); previewImg.src = ''; }
-          if (placeholder) placeholder.classList.remove('hidden');
-          if (clearBtn) clearBtn.classList.add('hidden');
-          if (fileInput) fileInput.value = '';
-        }
-
-        function saveLogoConfig() {
+        async function saveLogoConfig() {
           const urlInput = document.getElementById('logo-edit-url');
           const errEl = document.getElementById('logo-edit-error');
           const liveURL = urlInput ? urlInput.value.trim() : '';
 
-          // 验证 URL
           if (liveURL && !/^https?:\/\/.+/.test(liveURL)) {
             if (errEl) { errEl.textContent = '请输入有效的直播间地址（以 http:// 或 https:// 开头）'; errEl.classList.remove('hidden'); }
             return;
@@ -1232,22 +1383,30 @@
           if (errEl) errEl.classList.add('hidden');
 
           const config = getSiteConfig();
-          config.logoDataURL = tempLogoDataURL || null;
-          config.navLogoDataURL = tempNavLogoDataURL || null;
+          // 删除旧格式字段
+          delete config.logoDataURL;
+          delete config.navLogoDataURL;
+          // 只在用户修改过的字段上写入新值（undefined = 未修改，跳过保留原值）
+          if (tempLogoFile !== undefined) config.logoFile = tempLogoFile || null;
+          if (tempNavLogoFile !== undefined) config.navLogoFile = tempNavLogoFile || null;
+          if (tempFooterLogoFile !== undefined) config.footerLogoFile = tempFooterLogoFile || null;
           config.liveURL = liveURL || null;
-          saveSiteConfig(config);
+          await saveSiteConfig(config);
           applySiteConfig();
           closeLogoEditModal();
           showToast('战队 Logo 配置已保存', 'success');
         }
 
-        function resetLogoConfig() {
+        async function resetLogoConfig() {
           if (confirm('确定恢复默认 Logo 和直播间设置？')) {
             const config = getSiteConfig();
-            config.logoDataURL = null;
-            config.navLogoDataURL = null;
+            delete config.logoDataURL;
+            delete config.navLogoDataURL;
+            config.logoFile = null;
+            config.navLogoFile = null;
+            config.footerLogoFile = null;
             config.liveURL = null;
-            saveSiteConfig(config);
+            await saveSiteConfig(config);
             applySiteConfig();
             closeLogoEditModal();
             showToast('已恢复默认设置', 'info');
@@ -1261,8 +1420,11 @@
           }
         });
 
-        // 初始化
-        applySiteConfig();
+        // 初始化：先从服务端加载配置，再应用到页面
+        (async function init() {
+          await loadSiteConfig();
+          applySiteConfig();
+        })();
     </script>
   </body>
 </html>

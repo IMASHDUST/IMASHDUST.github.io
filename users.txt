@@ -3,10 +3,10 @@
 # admin = 管理员, member = 队员
 # 每行一个用户，以 # 开头的行为注释
 
-星恒、、,ydmb2025,member
+星恒,ydmb2025,member
 尘烬,ydmb2025,admin
 拉钩为什么上吊,ydmb2025,member
 大熊吃小熊,ydmb2025,member
 超绝乌萨奇,ydmb2025,member
-我的心好冷,ydmb2025,member
+我的心好冷,ydmb2025,menber
 泽木桃惠,ydmb2025,member

@@ -326,22 +326,31 @@
         <div class="p-5 space-y-5">
           <!-- 导航栏小图标 -->
           <div>
-            <label class="block text-sm font-medium text-white/80 mb-2">导航栏小图标</label>
+            <label class="block text-sm font-medium text-white/80 mb-2">导航栏小图标 <span class="text-ow-dark-muted text-xs ml-1">（从 img 文件夹选择）</span></label>
             <div id="nav-logo-edit-preview" class="logo-preview-area aspect-square rounded-xl border border-ow-dark-border flex items-center justify-center overflow-hidden mb-3" style="max-width:120px;">
               <div id="nav-logo-edit-placeholder" class="text-center">
                 <svg class="w-8 h-8 text-ow-dark-muted mx-auto mb-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                <span class="text-xs text-ow-dark-muted">建议上传正方形图片</span>
+                <span class="text-xs text-ow-dark-muted">从下方图库中选择</span>
               </div>
               <img id="nav-logo-edit-preview-img" class="w-full h-full object-cover hidden" src="" alt="导航栏图标预览" />
             </div>
-            <div class="flex items-center gap-3">
-              <label class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-ow-dark-border text-sm text-white/70 hover:border-ow-orange/40 hover:text-ow-orange transition-all cursor-pointer">
-                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                上传图标
-                <input type="file" id="nav-logo-edit-file" accept="image/*" class="hidden" onchange="handleNavLogoFileSelect(event)" />
-              </label>
-              <button id="nav-logo-edit-clear-btn" onclick="clearNavLogoPreview()" class="px-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition-colors hidden cursor-pointer">清除</button>
+            <div id="nav-logo-img-gallery" class="img-gallery grid grid-cols-5 gap-1.5 max-h-36 overflow-y-auto rounded-lg border border-ow-dark-border p-2 bg-[#0A0E17]"></div>
+            <button id="nav-logo-edit-clear-btn" onclick="clearNavLogoSelection()" class="mt-2 px-3 py-1.5 rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition-colors hidden cursor-pointer">清除选择</button>
+          </div>
+          <!-- 分隔线 -->
+          <div class="divider-gradient"></div>
+          <!-- 页脚小图标 -->
+          <div>
+            <label class="block text-sm font-medium text-white/80 mb-2">页脚小图标 <span class="text-ow-dark-muted text-xs ml-1">（从 img 文件夹选择）</span></label>
+            <div id="footer-logo-edit-preview" class="logo-preview-area aspect-square rounded-xl border border-ow-dark-border flex items-center justify-center overflow-hidden mb-3" style="max-width:80px;">
+              <div id="footer-logo-edit-placeholder" class="text-center">
+                <svg class="w-6 h-6 text-ow-dark-muted mx-auto mb-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <span class="text-[10px] text-ow-dark-muted">从下方图库中选择</span>
+              </div>
+              <img id="footer-logo-edit-preview-img" class="w-full h-full object-cover hidden" src="" alt="页脚图标预览" />
             </div>
+            <div id="footer-logo-img-gallery" class="img-gallery grid grid-cols-5 gap-1.5 max-h-36 overflow-y-auto rounded-lg border border-ow-dark-border p-2 bg-[#0A0E17]"></div>
+            <button id="footer-logo-edit-clear-btn" onclick="clearFooterLogoSelection()" class="mt-2 px-3 py-1.5 rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition-colors hidden cursor-pointer">清除选择</button>
           </div>
           <!-- 直播间地址 -->
           <div>
@@ -366,8 +375,9 @@
       <div class="max-w-7xl mx-auto px-6 lg:px-8 py-12">
         <div class="flex flex-col md:flex-row items-center justify-between gap-6">
           <a href="index.html" class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-ow-orange to-ow-orange-light flex items-center justify-center">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0A0E17" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            <div id="footer-logo-container" class="w-8 h-8 rounded-lg bg-gradient-to-br from-ow-orange to-ow-orange-light flex items-center justify-center overflow-hidden relative">
+              <svg id="footer-logo-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0A0E17" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              <img id="footer-logo-img" class="absolute inset-0 w-full h-full object-cover hidden" src="" alt="页脚Logo" />
             </div>
             <span class="font-display font-bold text-sm tracking-wider text-white/80">鱿点<span class="text-ow-orange">猫饼</span></span>
           </a>
@@ -535,22 +545,64 @@
 
     <!-- Logo & 直播间配置 -->
     <script>
-        const SITE_CONFIG_KEY = 'ydmb_site_config';
+        // ==========================================
+        //  img 文件夹可用图片列表
+        // ==========================================
+        const IMG_FILES = [
+          '76.png','amure.png','ana.png','aoreza.png','ash.png','bd.png',
+          'cj.jpg','dx.jpg','flower.png','genji.png','hutaodaifei.webp',
+          'irare.png','kiriko.png','lg.jpg','mcc.png','ow.jpg','ow2.jpg',
+          'ramatha.png','ruixi.png','suo.png','tracer.png','v.jpg',
+          'widowmaker.png','wisdom.png','wsq.jpg','wuyang.png','xh.jpg',
+          'xl.jpg','ydmb.jpg','yongjieqidong.jpg','youdianmaobt.jpg',
+          'zen.png','zhunuo.png','\u03a3.png'
+        ];
 
-        function getSiteConfig() {
-          try { return JSON.parse(localStorage.getItem(SITE_CONFIG_KEY) || '{}'); } catch(e) { return {}; }
+        function getImgUrl(filename) {
+          return filename ? 'img/' + filename : '';
         }
 
-        function saveSiteConfig(config) {
-          localStorage.setItem(SITE_CONFIG_KEY, JSON.stringify(config));
+        const API_BASE = window.location.origin;
+        let siteConfigCache = {};
+
+        async function loadSiteConfig() {
+          try {
+            const resp = await fetch(API_BASE + '/api/config');
+            if (resp.ok) { siteConfigCache = await resp.json(); }
+          } catch (e) {
+            try { siteConfigCache = JSON.parse(localStorage.getItem('ydmb_site_config') || '{}'); } catch(e2) { siteConfigCache = {}; }
+          }
+        }
+
+        function getSiteConfig() { return siteConfigCache; }
+
+        async function saveSiteConfig(config) {
+          siteConfigCache = config;
+          try {
+            await fetch(API_BASE + '/api/config', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(config) });
+          } catch (e) {
+            localStorage.setItem('ydmb_site_config', JSON.stringify(config));
+          }
+        }
+
+        function getEffectiveImgSrc(configKey) {
+          const config = getSiteConfig();
+          const val = config[configKey];
+          if (!val) return '';
+          if (val.startsWith('data:')) return val;
+          return getImgUrl(val);
         }
 
         function applySiteConfig() {
-          const config = getSiteConfig();
+          applyNavLogo(getEffectiveImgSrc('navLogoFile') || getEffectiveImgSrc('navLogoDataURL'));
+          applyFooterLogo(getEffectiveImgSrc('footerLogoFile'));
+        }
+
+        function applyNavLogo(src) {
           const navLogoImg = document.getElementById('nav-logo-img');
           const navLogoSvg = document.getElementById('nav-logo-svg');
-          if (config.navLogoDataURL && navLogoImg) {
-            navLogoImg.src = config.navLogoDataURL;
+          if (src && navLogoImg) {
+            navLogoImg.src = src;
             navLogoImg.classList.remove('hidden');
             if (navLogoSvg) navLogoSvg.classList.add('hidden');
           } else {
@@ -559,7 +611,46 @@
           }
         }
 
-        let tempNavLogoDataURL = null;
+        function applyFooterLogo(src) {
+          const footerLogoImg = document.getElementById('footer-logo-img');
+          const footerLogoSvg = document.getElementById('footer-logo-svg');
+          if (src && footerLogoImg) {
+            footerLogoImg.src = src;
+            footerLogoImg.classList.remove('hidden');
+            if (footerLogoSvg) footerLogoSvg.classList.add('hidden');
+          } else {
+            if (footerLogoImg) { footerLogoImg.classList.add('hidden'); footerLogoImg.src = ''; }
+            if (footerLogoSvg) footerLogoSvg.classList.remove('hidden');
+          }
+        }
+
+        // 图片库选择器
+        function buildImgGallery(containerId, selectedFile, onSelect) {
+          const container = document.getElementById(containerId);
+          if (!container) return;
+          container.innerHTML = IMG_FILES.map(f => {
+            const sel = f === selectedFile ? 'ring-2 ring-ow-orange opacity-100' : 'opacity-60 hover:opacity-100';
+            return '<div class="gallery-item cursor-pointer rounded overflow-hidden border border-transparent hover:border-ow-orange/50 transition-all ' + sel + '" data-file="' + f + '" onclick="' + onSelect.name + "('" + f + "')\"><img src=\"" + getImgUrl(f) + "\" class=\"w-full h-10 object-cover\" loading=\"lazy\" alt=\"" + f + "\" /></div>";
+          }).join('');
+        }
+
+        function setGallerySelection(containerId, filename) {
+          const container = document.getElementById(containerId);
+          if (!container) return;
+          container.querySelectorAll('.gallery-item').forEach(item => {
+            if (item.dataset.file === filename) {
+              item.classList.add('ring-2', 'ring-ow-orange');
+              item.classList.remove('opacity-60');
+              item.classList.add('opacity-100');
+            } else {
+              item.classList.remove('ring-2', 'ring-ow-orange', 'opacity-100');
+              item.classList.add('opacity-60');
+            }
+          });
+        }
+
+        let tempNavLogoFile = undefined;
+        let tempFooterLogoFile = undefined;
 
         function openLogoEditModal() {
           const config = getSiteConfig();
@@ -567,21 +658,19 @@
           const urlInput = document.getElementById('logo-edit-url');
           const errEl = document.getElementById('logo-edit-error');
 
-          tempNavLogoDataURL = config.navLogoDataURL || null;
-          const navPreviewImg = document.getElementById('nav-logo-edit-preview-img');
-          const navPlaceholder = document.getElementById('nav-logo-edit-placeholder');
+          const currentNavFile = config.navLogoFile || '';
+          tempNavLogoFile = undefined;
+          updateNavLogoPreview(currentNavFile);
+          buildImgGallery('nav-logo-img-gallery', currentNavFile, selectNavLogoFile);
           const navClearBtn = document.getElementById('nav-logo-edit-clear-btn');
+          if (navClearBtn) navClearBtn.classList.toggle('hidden', !currentNavFile);
 
-          if (config.navLogoDataURL && navPreviewImg) {
-            navPreviewImg.src = config.navLogoDataURL;
-            navPreviewImg.classList.remove('hidden');
-            if (navPlaceholder) navPlaceholder.classList.add('hidden');
-            if (navClearBtn) navClearBtn.classList.remove('hidden');
-          } else {
-            if (navPreviewImg) { navPreviewImg.classList.add('hidden'); navPreviewImg.src = ''; }
-            if (navPlaceholder) navPlaceholder.classList.remove('hidden');
-            if (navClearBtn) navClearBtn.classList.add('hidden');
-          }
+          const currentFooterFile = config.footerLogoFile || '';
+          tempFooterLogoFile = undefined;
+          updateFooterLogoPreview(currentFooterFile);
+          buildImgGallery('footer-logo-img-gallery', currentFooterFile, selectFooterLogoFile);
+          const footerClearBtn = document.getElementById('footer-logo-edit-clear-btn');
+          if (footerClearBtn) footerClearBtn.classList.toggle('hidden', !currentFooterFile);
 
           if (urlInput) urlInput.value = config.liveURL || '';
           if (errEl) errEl.classList.add('hidden');
@@ -590,6 +679,64 @@
             modal.classList.remove('hidden');
             document.body.style.overflow = 'hidden';
           }
+        }
+
+        function updateNavLogoPreview(filename) {
+          const previewImg = document.getElementById('nav-logo-edit-preview-img');
+          const placeholder = document.getElementById('nav-logo-edit-placeholder');
+          if (filename && previewImg) {
+            previewImg.src = getImgUrl(filename);
+            previewImg.classList.remove('hidden');
+            if (placeholder) placeholder.classList.add('hidden');
+          } else {
+            if (previewImg) { previewImg.classList.add('hidden'); previewImg.src = ''; }
+            if (placeholder) placeholder.classList.remove('hidden');
+          }
+        }
+
+        function updateFooterLogoPreview(filename) {
+          const previewImg = document.getElementById('footer-logo-edit-preview-img');
+          const placeholder = document.getElementById('footer-logo-edit-placeholder');
+          if (filename && previewImg) {
+            previewImg.src = getImgUrl(filename);
+            previewImg.classList.remove('hidden');
+            if (placeholder) placeholder.classList.add('hidden');
+          } else {
+            if (previewImg) { previewImg.classList.add('hidden'); previewImg.src = ''; }
+            if (placeholder) placeholder.classList.remove('hidden');
+          }
+        }
+
+        function selectNavLogoFile(filename) {
+          tempNavLogoFile = filename;
+          setGallerySelection('nav-logo-img-gallery', filename);
+          updateNavLogoPreview(filename);
+          const clearBtn = document.getElementById('nav-logo-edit-clear-btn');
+          if (clearBtn) clearBtn.classList.toggle('hidden', !filename);
+        }
+
+        function selectFooterLogoFile(filename) {
+          tempFooterLogoFile = filename;
+          setGallerySelection('footer-logo-img-gallery', filename);
+          updateFooterLogoPreview(filename);
+          const clearBtn = document.getElementById('footer-logo-edit-clear-btn');
+          if (clearBtn) clearBtn.classList.toggle('hidden', !filename);
+        }
+
+        function clearNavLogoSelection() {
+          tempNavLogoFile = null;
+          updateNavLogoPreview(null);
+          setGallerySelection('nav-logo-img-gallery', null);
+          const clearBtn = document.getElementById('nav-logo-edit-clear-btn');
+          if (clearBtn) clearBtn.classList.add('hidden');
+        }
+
+        function clearFooterLogoSelection() {
+          tempFooterLogoFile = null;
+          updateFooterLogoPreview(null);
+          setGallerySelection('footer-logo-img-gallery', null);
+          const clearBtn = document.getElementById('footer-logo-edit-clear-btn');
+          if (clearBtn) clearBtn.classList.add('hidden');
         }
 
         function closeLogoEditModal(event) {
@@ -601,42 +748,7 @@
           }
         }
 
-        function handleNavLogoFileSelect(event) {
-          const file = event.target.files[0];
-          if (!file) return;
-
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            tempNavLogoDataURL = e.target.result;
-
-            const previewImg = document.getElementById('nav-logo-edit-preview-img');
-            const placeholder = document.getElementById('nav-logo-edit-placeholder');
-            const clearBtn = document.getElementById('nav-logo-edit-clear-btn');
-
-            if (previewImg) {
-              previewImg.src = tempNavLogoDataURL;
-              previewImg.classList.remove('hidden');
-            }
-            if (placeholder) placeholder.classList.add('hidden');
-            if (clearBtn) clearBtn.classList.remove('hidden');
-          };
-          reader.readAsDataURL(file);
-        }
-
-        function clearNavLogoPreview() {
-          tempNavLogoDataURL = null;
-          const previewImg = document.getElementById('nav-logo-edit-preview-img');
-          const placeholder = document.getElementById('nav-logo-edit-placeholder');
-          const clearBtn = document.getElementById('nav-logo-edit-clear-btn');
-          const fileInput = document.getElementById('nav-logo-edit-file');
-
-          if (previewImg) { previewImg.classList.add('hidden'); previewImg.src = ''; }
-          if (placeholder) placeholder.classList.remove('hidden');
-          if (clearBtn) clearBtn.classList.add('hidden');
-          if (fileInput) fileInput.value = '';
-        }
-
-        function saveLogoConfig() {
+        async function saveLogoConfig() {
           const urlInput = document.getElementById('logo-edit-url');
           const errEl = document.getElementById('logo-edit-error');
           const liveURL = urlInput ? urlInput.value.trim() : '';
@@ -649,20 +761,24 @@
           if (errEl) errEl.classList.add('hidden');
 
           const config = getSiteConfig();
-          config.navLogoDataURL = tempNavLogoDataURL || null;
+          delete config.navLogoDataURL;
+          if (tempNavLogoFile !== undefined) config.navLogoFile = tempNavLogoFile || null;
+          if (tempFooterLogoFile !== undefined) config.footerLogoFile = tempFooterLogoFile || null;
           config.liveURL = liveURL || null;
-          saveSiteConfig(config);
+          await saveSiteConfig(config);
           applySiteConfig();
           closeLogoEditModal();
           showToast('配置已保存', 'success');
         }
 
-        function resetLogoConfig() {
+        async function resetLogoConfig() {
           if (confirm('确定恢复默认图标和直播间设置？')) {
             const config = getSiteConfig();
-            config.navLogoDataURL = null;
+            delete config.navLogoDataURL;
+            config.navLogoFile = null;
+            config.footerLogoFile = null;
             config.liveURL = null;
-            saveSiteConfig(config);
+            await saveSiteConfig(config);
             applySiteConfig();
             closeLogoEditModal();
             showToast('已恢复默认设置', 'info');
@@ -670,119 +786,120 @@
         }
 
         // 初始化
-        applySiteConfig();
+        (async function init() { await loadSiteConfig(); applySiteConfig(); })();
     </script>
 
     <!-- ====== JavaScript ====== -->
     <script>
       // ==========================================
-      //  IndexedDB 层 — 持久化存储视频文件二进制数据
-      // ==========================================
-      const DB_NAME = 'ydmb_video_db';
-      const DB_VERSION = 1;
-      const BLOB_STORE = 'video_blobs';
-
-      function openDB() {
-        return new Promise((resolve, reject) => {
-          const request = indexedDB.open(DB_NAME, DB_VERSION);
-          request.onupgradeneeded = (e) => {
-            const db = e.target.result;
-            if (!db.objectStoreNames.contains(BLOB_STORE)) {
-              db.createObjectStore(BLOB_STORE, { keyPath: 'id' });
-            }
-          };
-          request.onsuccess = (e) => resolve(e.target.result);
-          request.onerror = (e) => reject(e.target.error);
-        });
-      }
-
-      async function storeVideoBlob(id, blob) {
-        const db = await openDB();
-        return new Promise((resolve, reject) => {
-          const tx = db.transaction(BLOB_STORE, 'readwrite');
-          tx.objectStore(BLOB_STORE).put({ id, blob });
-          tx.oncomplete = () => resolve();
-          tx.onerror = (e) => reject(e.target.error);
-        });
-      }
-
-      async function getVideoBlob(id) {
-        const db = await openDB();
-        return new Promise((resolve, reject) => {
-          const tx = db.transaction(BLOB_STORE, 'readonly');
-          const req = tx.objectStore(BLOB_STORE).get(id);
-          req.onsuccess = () => resolve(req.result ? req.result.blob : null);
-          req.onerror = (e) => reject(e.target.error);
-        });
-      }
-
-      async function deleteVideoBlob(id) {
-        const db = await openDB();
-        return new Promise((resolve, reject) => {
-          const tx = db.transaction(BLOB_STORE, 'readwrite');
-          tx.objectStore(BLOB_STORE).delete(id);
-          tx.oncomplete = () => resolve();
-          tx.onerror = (e) => reject(e.target.error);
-        });
-      }
-
-      // 缓存已解析的 blob URL（id → { url, blob }），避免重复构造
-      const blobUrlCache = {};
-
-      // 从 IndexedDB 取出 blob 并创建可用的 blob URL
-      async function getPlayableUrl(video) {
-        // 如果是文件类型，从 IDB 动态生成 blob URL
-        if (video.type === 'file') {
-          // 已有缓存且未失效，直接复用
-          if (blobUrlCache[video.id]) {
-            return blobUrlCache[video.id].url;
-          }
-          try {
-            const blob = await getVideoBlob(video.id);
-            if (blob) {
-              const url = URL.createObjectURL(blob);
-              blobUrlCache[video.id] = { url, blob };
-              return url;
-            }
-          } catch (e) {
-            console.error('读取视频文件失败:', e);
-          }
-          return null;
-        }
-        // 旧数据（无 type 字段）或 URL 类型 — url 字段直接就是链接
-        return video.url || null;
-      }
-
-      // 播放完后清理缓存的 blob URL
-      function revokeCachedUrl(id) {
-        if (blobUrlCache[id]) {
-          URL.revokeObjectURL(blobUrlCache[id].url);
-          delete blobUrlCache[id];
-        }
-      }
-
-      // ==========================================
-      //  localStorage 元数据管理
+      //  视频数据管理 — 服务端同步存储
+      //  元数据 → GET/PUT /api/videos
+      //  文件   → POST /api/videos/upload  /  GET /api/videos/file/:name
+      //  删除   → DELETE /api/videos/:id
+      //  localStorage 仅作为离线/降级兜底
       // ==========================================
       const STORAGE_KEY = 'ydmb_videos';
 
-      function loadVideos() {
-        try {
-          const data = localStorage.getItem(STORAGE_KEY);
-          return data ? JSON.parse(data) : [];
-        } catch (e) {
-          return [];
-        }
-      }
+      // 服务端 URL 前缀
+      const API_BASE = window.location.origin;
 
-      function saveVideos(videos) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(videos));
-      }
-
-      let videos = loadVideos();
+      // 视频元数据内存缓存
+      let videos = [];
       let currentFilter = 'all';
       let searchQuery = '';
       let selectedFile = null;
+
+      // ========== 服务端 API 操作 ==========
+      async function loadVideosFromServer() {
+        try {
+          const resp = await fetch(API_BASE + '/api/videos');
+          if (resp.ok) {
+            videos = await resp.json();
+            return;
+          }
+        } catch (e) {
+          console.warn('从服务端加载视频列表失败，回退到 localStorage:', e);
+        }
+        // 降级：从 localStorage 读取
+        loadVideosLocal();
+      }
+
+      function loadVideosLocal() {
+        try {
+          const data = localStorage.getItem(STORAGE_KEY);
+          videos = data ? JSON.parse(data) : [];
+        } catch (e) {
+          videos = [];
+        }
+      }
+
+      async function saveVideosToServer() {
+        // 过滤掉 thumbFile 等临时字段
+        const clean = videos.map(v => {
+          const { thumbFile, ...rest } = v;
+          return rest;
+        });
+        try {
+          const resp = await fetch(API_BASE + '/api/videos', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ videos: clean })
+          });
+          if (resp.ok) {
+            // 同时更新 localStorage 作为降级兜底
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(clean));
+            return;
+          }
+        } catch (e) {
+          console.warn('保存视频列表到服务端失败，降级到 localStorage:', e);
+        }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(clean));
+      }
+
+      // 上传视频文件到服务端
+      async function uploadVideoFile(id, file) {
+        const formData = new FormData();
+        formData.append('video', file);
+        formData.append('id', id);
+
+        try {
+          const resp = await fetch(API_BASE + '/api/videos/upload', {
+            method: 'POST',
+            body: formData
+          });
+          if (resp.ok) {
+            const result = await resp.json();
+            return result.url; // 返回服务端文件 URL
+          }
+        } catch (e) {
+          console.error('上传视频文件到服务端失败:', e);
+        }
+        return null;
+      }
+
+      // 获取视频播放 URL（文件类型从服务端流式播放）
+      function getPlayableUrl(video) {
+        if (video.type === 'file') {
+          // 如果有服务端 fileUrl，直接使用
+          if (video.fileUrl) return video.fileUrl;
+          // 兼容旧格式
+          if (video.url && video.url.startsWith('idb://')) {
+            return API_BASE + '/api/videos/file/' + video.id + '.mp4';
+          }
+          return video.url || null;
+        }
+        // URL 类型直接使用
+        return video.url || null;
+      }
+
+      // ========== 视频删除（服务端 + 本地同步） ==========
+      async function deleteVideoFromServer(id) {
+        try {
+          await fetch(API_BASE + '/api/videos/' + id, { method: 'DELETE' });
+        } catch (e) {
+          console.warn('从服务端删除视频失败:', e);
+        }
+      }
 
       // ==========================================
       //  认证系统 (Auth Module)
@@ -1209,7 +1326,7 @@
       }
 
       // ==========================================
-      //  提交视频（核心：文件 → IndexedDB / URL → 直接存）
+      //  提交视频（核心：文件 → 服务端 / URL → 直接存）
       // ==========================================
       async function submitVideo() {
         const title = document.getElementById('title-input').value.trim();
@@ -1226,8 +1343,9 @@
         submitBtn.textContent = '上传中...';
 
         const session = getSession();
+        const videoId = generateId();
         const videoData = {
-          id: generateId(),
+          id: videoId,
           title,
           category,
           uploader: uploader || (session ? session.username : '匿名'),
@@ -1235,8 +1353,9 @@
           desc,
           createdAt: new Date().toISOString(),
           views: 0,
-          type: 'url',       // 默认 URL，文件上传时改为 'file'
-          url: '',           // URL 或 标记值（文件类型存 'idb://' + id）
+          type: 'url',
+          url: '',
+          fileUrl: '',
           thumbnail: '',
           duration: '--:--',
         };
@@ -1258,10 +1377,10 @@
               progressPercent.textContent = Math.floor(progress) + '%';
             }, 120);
 
-            // 2) 并行：存 blob + 获取时长 + 生成缩略图
+            // 2) 并行：上传文件到服务端 + 获取时长 + 生成缩略图
             const file = selectedFile;
-            const [_, duration, thumbnail] = await Promise.all([
-              storeVideoBlob(videoData.id, file),
+            const [serverFileUrl, duration, thumbnail] = await Promise.all([
+              uploadVideoFile(videoId, file),
               new Promise((resolve) => {
                 const v = document.createElement('video');
                 v.preload = 'metadata';
@@ -1276,19 +1395,24 @@
             progressFill.style.width = '100%';
             progressPercent.textContent = '100%';
 
+            if (!serverFileUrl) {
+              showToast('视频文件上传到服务器失败，请检查网络连接', 'error');
+              submitBtn.disabled = false;
+              submitBtn.textContent = '确认上传';
+              return;
+            }
+
             videoData.type = 'file';
-            videoData.url = 'idb://' + videoData.id;  // 标记
+            videoData.fileUrl = serverFileUrl;
+            videoData.url = serverFileUrl; // 兼容旧代码
             videoData.duration = duration;
             videoData.thumbnail = thumbnail || '';
 
-            // 预缓存当前 session 的 blob URL
-            blobUrlCache[videoData.id] = { url: URL.createObjectURL(file), blob: file };
-
             videos.unshift(videoData);
-            saveVideos(videos);
+            await saveVideosToServer();
             renderVideos();
             closeUploadModal();
-            showToast('视频上传成功！', 'success');
+            showToast('视频上传成功！所有设备均可观看', 'success');
           } else {
             // --- URL 上传流程 ---
             videoData.type = 'url';
@@ -1297,22 +1421,22 @@
             const tempVideo = document.createElement('video');
             tempVideo.preload = 'metadata';
             tempVideo.crossOrigin = 'anonymous';
-            tempVideo.onloadedmetadata = () => {
+            tempVideo.onloadedmetadata = async () => {
               videoData.duration = formatTime(tempVideo.duration || 0);
               tempVideo.remove();
               videos.unshift(videoData);
-              saveVideos(videos);
+              await saveVideosToServer();
               renderVideos();
               closeUploadModal();
               showToast('视频添加成功！', 'success');
               submitBtn.disabled = false;
               submitBtn.textContent = '确认上传';
             };
-            tempVideo.onerror = () => {
+            tempVideo.onerror = async () => {
               videoData.url = url;
               tempVideo.remove();
               videos.unshift(videoData);
-              saveVideos(videos);
+              await saveVideosToServer();
               renderVideos();
               closeUploadModal();
               showToast('视频添加成功（无法读取时长）', 'success');
@@ -1332,14 +1456,14 @@
       }
 
       // ==========================================
-      //  播放视频（异步获取播放地址）
+      //  播放视频（同步获取播放地址，服务端直连）
       // ==========================================
       async function playVideo(id) {
         const video = videos.find(v => v.id === id);
         if (!video) return;
 
         video.views = (video.views || 0) + 1;
-        saveVideos(videos);
+        saveVideosToServer();
 
         const modal = document.getElementById('play-modal');
         const player = document.getElementById('play-video');
@@ -1355,9 +1479,9 @@
         modal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
 
-        // 异步获取可播放的 URL
+        // 获取可播放的 URL（文件类型直接指向服务端）
         player.src = '';
-        const playableUrl = await getPlayableUrl(video);
+        const playableUrl = getPlayableUrl(video);
         if (playableUrl) {
           player.src = playableUrl;
           player.load();
@@ -1369,10 +1493,6 @@
 
         // 播放出错时的兜底
         player.onerror = () => {
-          if (player.src && !player.src.startsWith('blob:')) {
-            // URL 类型的不用特殊处理，浏览器会显示错误
-            return;
-          }
           showToast('视频播放失败', 'error');
         };
 
@@ -1390,21 +1510,17 @@
       }
 
       // ==========================================
-      //  删除视频（同时清理 IndexedDB）
+      //  删除视频（同步删除服务端文件 + 元数据）
       // ==========================================
       async function deleteVideo(id) {
         const video = videos.find(v => v.id === id);
         if(!video) return;
         if(!canDeleteVideo(video)){ showToast('你没有权限删除此视频（仅可删除自己上传的视频，管理员可删除所有视频）','error'); return; }
         if (!confirm('确定要删除这个视频吗？此操作不可撤销。')) return;
-        // 清理 blob URL 缓存
-        revokeCachedUrl(id);
-        // 清理 IndexedDB 中的文件
-        if (video.type === 'file') {
-          await deleteVideoBlob(id).catch(() => {});
-        }
+        // 从服务端删除文件 + 元数据
+        await deleteVideoFromServer(id);
         videos = videos.filter(v => v.id !== id);
-        saveVideos(videos);
+        await saveVideosToServer();
         renderVideos();
         showToast('视频已删除', 'info');
       }
@@ -1510,28 +1626,30 @@
       });
 
       // ==========================================
-      //  初始化
+      //  初始化（先从服务端加载数据，再渲染）
       // ==========================================
-      updateAuthUI();
-      renderVideos();
+      (async function init() {
+        updateAuthUI();
+        await loadVideosFromServer();
+        renderVideos();
 
-      // 从 URL 参数自动播放指定视频（从首页跳转过来）
-      const urlParams = new URLSearchParams(window.location.search);
-      const playId = urlParams.get('play');
-      if (playId) {
-        // 等一小段时间确保 DOM 和视频数据都加载完毕
-        setTimeout(() => {
-          const v = videos.find(v => v.id === playId);
-          if (v) {
-            playVideo(playId);
-          }
-        }, 300);
-      }
+        // 从 URL 参数自动播放指定视频（从首页跳转过来）
+        const urlParams = new URLSearchParams(window.location.search);
+        const playId = urlParams.get('play');
+        if (playId) {
+          setTimeout(() => {
+            const v = videos.find(v => v.id === playId);
+            if (v) {
+              playVideo(playId);
+            }
+          }, 300);
+        }
 
-      if (videos.length === 0) {
-        console.log('💡 提示：点击"上传视频"按钮或按 Ctrl+U 开始添加实战视频！');
-        console.log('💡 上传的视频文件存储在浏览器 IndexedDB 中，刷新页面不会丢失。');
-      }
+        if (videos.length === 0) {
+          console.log('💡 提示：点击"上传视频"按钮或按 Ctrl+U 开始添加实战视频！');
+          console.log('💡 上传的视频文件存储在服务端，所有设备均可观看！');
+        }
+      })();
     </script>
   </body>
 </html>
