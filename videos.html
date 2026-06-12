@@ -1,0 +1,1581 @@
+<!doctype html>
+<html lang="zh-CN" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>实战视频 | 鱿点猫饼</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"Noto Sans SC"', '"PingFang SC"', '"Microsoft YaHei"', 'sans-serif'],
+              display: ['"Orbitron"', '"Noto Sans SC"', 'sans-serif'],
+            },
+            colors: {
+              ow: {
+                orange: '#FA9C1B',
+                'orange-light': '#FBBF24',
+                blue: '#218FFE',
+                'blue-dark': '#0B3D91',
+                dark: '#0A0E17',
+                'dark-card': '#111827',
+                'dark-border': '#1F2937',
+                'dark-muted': '#9CA3AF',
+              }
+            },
+            animation: {
+              'float': 'float 6s ease-in-out infinite',
+              'glow': 'glow 2s ease-in-out infinite alternate',
+              'slide-up': 'slideUp 0.6s ease-out',
+              'fade-in': 'fadeIn 0.5s ease-out',
+              'scale-in': 'scaleIn 0.3s ease-out',
+              'shimmer': 'shimmer 2s infinite',
+            },
+            keyframes: {
+              float: { '0%, 100%': { transform: 'translateY(0px)' }, '50%': { transform: 'translateY(-10px)' } },
+              glow: { '0%': { boxShadow: '0 0 20px rgba(250, 156, 27, 0.2)' }, '100%': { boxShadow: '0 0 40px rgba(250, 156, 27, 0.4)' } },
+              slideUp: { '0%': { transform: 'translateY(30px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
+              fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+              scaleIn: { '0%': { transform: 'scale(0.9)', opacity: '0' }, '100%': { transform: 'scale(1)', opacity: '1' } },
+              shimmer: { '0%': { backgroundPosition: '-200% 0' }, '100%': { backgroundPosition: '200% 0' } },
+            },
+          },
+        },
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <style>
+      html { scroll-behavior: smooth; }
+      body { background-color: #0A0E17; }
+
+      .bg-grid {
+        background-image:
+          linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+        background-size: 60px 60px;
+      }
+      .text-gradient {
+        background: linear-gradient(135deg, #FA9C1B 0%, #FBBF24 50%, #FA9C1B 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .nav-glass {
+        background: rgba(17, 24, 39, 0.75);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+      }
+      .card-hover {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .card-hover:hover {
+        transform: translateY(-4px);
+        border-color: rgba(250, 156, 27, 0.3);
+        box-shadow: 0 20px 40px rgba(250, 156, 27, 0.08);
+      }
+      .divider-gradient {
+        height: 1px;
+        background: linear-gradient(90deg, transparent 0%, rgba(250,156,27,0.3) 50%, transparent 100%);
+      }
+      .nav-link { position: relative; }
+      .nav-link::after {
+        content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px;
+        background: linear-gradient(90deg, #FA9C1B, #FBBF24); transition: width 0.3s ease;
+      }
+      .nav-link:hover::after { width: 100%; }
+
+      /* 筛选标签 */
+      .filter-tab { transition: all 0.3s ease; cursor: pointer; }
+      .filter-tab.active {
+        background: linear-gradient(135deg, #FA9C1B, #FBBF24);
+        color: #0A0E17; border-color: transparent;
+      }
+
+      /* 视频卡片 */
+      .video-card {
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .video-card:hover .video-thumb { transform: scale(1.05); }
+      .video-card:hover .video-play-btn {
+        transform: translate(-50%, -50%) scale(1.15);
+        box-shadow: 0 0 30px rgba(250, 156, 27, 0.5);
+      }
+      .video-thumb { transition: transform 0.5s ease; }
+      .video-play-btn {
+        transition: all 0.3s ease;
+        pointer-events: none;
+      }
+
+      /* 上传区域 */
+      .upload-zone {
+        transition: all 0.3s ease;
+        border: 2px dashed rgba(250, 156, 27, 0.3);
+      }
+      .upload-zone:hover, .upload-zone.drag-over {
+        border-color: rgba(250, 156, 27, 0.7);
+        background: rgba(250, 156, 27, 0.05);
+      }
+
+      /* Toast */
+      .toast {
+        animation: slideUp 0.4s ease-out;
+      }
+
+      /* 视频模态框 */
+      .modal-overlay {
+        animation: fadeIn 0.3s ease-out;
+      }
+      .modal-content {
+        animation: scaleIn 0.3s ease-out;
+      }
+
+      /* 删除按钮 */
+      .delete-btn {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      .video-card:hover .delete-btn {
+        opacity: 1;
+      }
+
+      /* 滚动条 */
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-track { background: #0A0E17; }
+      ::-webkit-scrollbar-thumb { background: #1F2937; border-radius: 3px; }
+      ::-webkit-scrollbar-thumb:hover { background: #374151; }
+
+      /* 文件输入隐藏 */
+      .file-input-hidden { position: absolute; opacity: 0; width: 0; height: 0; overflow: hidden; }
+
+      /* 进度条 */
+      .progress-bar {
+        transition: width 0.3s ease;
+      }
+
+      /* 认证模态框 */
+      .auth-tab { transition: all 0.3s ease; cursor: pointer; }
+      .auth-modal-overlay { animation: fadeIn 0.3s ease-out; }
+      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+  </head>
+  <body class="bg-ow-dark text-white font-sans antialiased">
+
+    <!-- ====== 导航栏 ====== -->
+    <nav class="fixed top-0 left-0 right-0 z-50 nav-glass border-b border-ow-dark-border">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center gap-2">
+            <a href="index.html" class="flex items-center gap-3 group">
+              <div id="nav-logo-container" class="w-10 h-10 rounded-lg bg-gradient-to-br from-ow-orange to-ow-orange-light flex items-center justify-center group-hover:animate-glow transition-all duration-300 overflow-hidden relative">
+                <svg id="nav-logo-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0A0E17" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+                </svg>
+                <img id="nav-logo-img" class="absolute inset-0 w-full h-full object-cover hidden" src="" alt="导航Logo" />
+              </div>
+              <span class="font-display font-bold text-lg tracking-wider">
+                <span class="text-white">鱿点</span><span class="text-ow-orange">猫饼</span>
+              </span>
+            </a>
+            <button id="nav-logo-edit-btn" class="hidden w-6 h-6 rounded border border-ow-orange/30 flex items-center justify-center hover:bg-ow-orange/10 transition-all cursor-pointer flex-shrink-0" onclick="openLogoEditModal()" title="编辑Logo">
+              <svg class="w-3 h-3 text-ow-orange/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+          </div>
+
+          <div class="hidden md:flex items-center gap-8">
+            <a href="index.html" class="nav-link text-sm font-medium text-white/80 hover:text-white transition-colors">首页</a>
+            <a href="index.html#about" class="nav-link text-sm font-medium text-white/80 hover:text-white transition-colors">关于我们</a>
+            <a href="members.html" class="nav-link text-sm font-medium text-white/80 hover:text-white transition-colors">队员阵容</a>
+            <a href="videos.html" class="nav-link text-sm font-medium text-ow-orange transition-colors">实战视频</a>
+            <a href="join.html" class="nav-link text-sm font-medium text-white/80 hover:text-white transition-colors">加入我们</a>
+          </div>
+
+          <div class="flex items-center gap-4">
+            <!-- 未登录：登录按钮 -->
+            <button id="nav-login-btn" onclick="openAuthModal()" class="hidden md:inline-flex items-center gap-2 px-5 py-2 rounded-lg border border-ow-orange/50 text-ow-orange text-sm font-medium hover:bg-ow-orange/10 transition-all duration-300 cursor-pointer">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              登录
+            </button>
+            <!-- 已登录时可用的上传按钮 -->
+            <button id="nav-upload-btn" onclick="openUploadModal()" class="hidden md:inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-gradient-to-r from-ow-orange to-ow-orange-light text-ow-dark text-sm font-semibold hover:shadow-lg hover:shadow-ow-orange/25 transition-all duration-300 cursor-pointer">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+              上传视频
+            </button>
+            <!-- 已登录：用户信息 -->
+            <div id="nav-user-info" class="hidden md:flex items-center gap-3">
+              <span id="nav-role-badge" class="text-xs px-2 py-0.5 rounded-full font-medium border"></span>
+              <div class="w-8 h-8 rounded-full bg-ow-orange/20 border border-ow-orange/30 flex items-center justify-center">
+                <svg id="nav-avatar-icon" class="w-4 h-4 text-ow-orange" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
+              <span id="nav-username" class="text-sm font-medium text-white"></span>
+              <button onclick="doLogout()" class="text-xs text-ow-dark-muted hover:text-red-400 transition-colors cursor-pointer ml-1">退出</button>
+            </div>
+            <button id="mobile-menu-btn" class="md:hidden p-2 rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 移动端菜单 -->
+      <div id="mobile-menu" class="hidden md:hidden border-t border-ow-dark-border bg-[#0A0E17]/95 backdrop-blur-xl">
+        <div class="px-6 py-4 space-y-3">
+          <a href="index.html" class="block text-sm font-medium text-white/80 hover:text-white transition-colors py-2">首页</a>
+          <a href="index.html#about" class="block text-sm font-medium text-white/80 hover:text-white transition-colors py-2">关于我们</a>
+          <a href="members.html" class="block text-sm font-medium text-white/80 hover:text-white transition-colors py-2">队员阵容</a>
+          <a href="videos.html" class="block text-sm font-medium text-ow-orange transition-colors py-2">实战视频</a>
+          <a href="join.html" class="block text-sm font-medium text-white/80 hover:text-white transition-colors py-2">加入我们</a>
+          <button id="mobile-upload-btn" onclick="openUploadModal();document.getElementById('mobile-menu').classList.add('hidden');" class="w-full mt-2 text-center px-5 py-2.5 rounded-lg bg-gradient-to-r from-ow-orange to-ow-orange-light text-ow-dark text-sm font-semibold cursor-pointer">+ 上传视频</button>
+          <button onclick="openAuthModal();document.getElementById('mobile-menu').classList.add('hidden');" class="block w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-ow-orange hover:bg-ow-orange/10 transition-colors cursor-pointer" id="mobile-login-btn">登录 / 注册</button>
+          <button onclick="doLogout();document.getElementById('mobile-menu').classList.add('hidden');" class="hidden w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer" id="mobile-logout-btn">退出登录</button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ====== 页面头部 ====== -->
+    <section class="relative pt-28 pb-12 bg-grid">
+      <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(ellipse 60% 50% at 50% 30%, rgba(250,156,27,0.06) 0%, transparent 60%);"></div>
+      <div class="relative max-w-7xl mx-auto px-6 lg:px-8 text-center">
+        <h1 class="text-4xl md:text-5xl font-display font-bold mb-4 animate-fade-in">
+          <span class="text-gradient">实战视频</span>
+        </h1>
+        <p class="text-ow-dark-muted max-w-2xl mx-auto mb-8 text-sm md:text-base">记录每一次高光时刻，分享你的战斗集锦</p>
+        <div class="flex flex-wrap items-center justify-center gap-6 text-sm">
+          <div class="bg-ow-dark-card border border-ow-dark-border rounded-xl px-5 py-3">
+            <span class="text-ow-dark-muted">视频总数</span>
+            <p id="total-count" class="text-2xl font-display font-bold text-white mt-1">0</p>
+          </div>
+          <div class="bg-ow-dark-card border border-ow-dark-border rounded-xl px-5 py-3">
+            <span class="text-ow-dark-muted">总播放量</span>
+            <p id="total-views" class="text-2xl font-display font-bold text-white mt-1">0</p>
+          </div>
+          <div class="bg-ow-dark-card border border-ow-dark-border rounded-xl px-5 py-3">
+            <span class="text-ow-dark-muted">今日新增</span>
+            <p id="today-uploads" class="text-2xl font-display font-bold text-ow-orange mt-1">0</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 筛选 + 操作栏 ====== -->
+    <section class="relative max-w-7xl mx-auto px-6 lg:px-8 pb-6">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <!-- 分类筛选 -->
+        <div class="flex flex-wrap items-center gap-2" id="filter-tabs">
+          <button class="filter-tab active px-4 py-2 rounded-lg text-sm font-medium border border-ow-dark-border bg-ow-dark-card text-white/70" data-filter="all">全部</button>
+          <button class="filter-tab px-4 py-2 rounded-lg text-sm font-medium border border-ow-dark-border bg-ow-dark-card text-white/70" data-filter="击杀集锦">击杀集锦</button>
+          <button class="filter-tab px-4 py-2 rounded-lg text-sm font-medium border border-ow-dark-border bg-ow-dark-card text-white/70" data-filter="战术复盘">战术复盘</button>
+          <button class="filter-tab px-4 py-2 rounded-lg text-sm font-medium border border-ow-dark-border bg-ow-dark-card text-white/70" data-filter="支援集锦">支援集锦</button>
+          <button class="filter-tab px-4 py-2 rounded-lg text-sm font-medium border border-ow-dark-border bg-ow-dark-card text-white/70" data-filter="搞笑时刻">搞笑时刻</button>
+          <button class="filter-tab px-4 py-2 rounded-lg text-sm font-medium border border-ow-dark-border bg-ow-dark-card text-white/70" data-filter="训练赛">训练赛</button>
+          <button class="filter-tab px-4 py-2 rounded-lg text-sm font-medium border border-ow-dark-border bg-ow-dark-card text-white/70" data-filter="自定义">自定义</button>
+        </div>
+
+        <!-- 搜索 + 上传 -->
+        <div class="flex items-center gap-3 w-full sm:w-auto">
+          <div class="relative flex-1 sm:w-56">
+            <input id="search-input" type="text" placeholder="搜索视频..." class="w-full bg-ow-dark-card border border-ow-dark-border rounded-lg px-4 py-2 pl-10 text-sm text-white placeholder-ow-dark-muted focus:outline-none focus:border-ow-orange/50 transition-colors" />
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ow-dark-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </div>
+          <button onclick="openUploadModal()" class="md:hidden inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-gradient-to-r from-ow-orange to-ow-orange-light text-ow-dark text-sm font-semibold cursor-pointer whitespace-nowrap">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            上传
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 视频网格 ====== -->
+    <section class="relative max-w-7xl mx-auto px-6 lg:px-8 pb-12">
+      <!-- 空状态 -->
+      <div id="empty-state" class="text-center py-20">
+        <div class="w-24 h-24 mx-auto mb-6 rounded-full bg-ow-dark-card border border-ow-dark-border flex items-center justify-center">
+          <svg class="w-10 h-10 text-ow-dark-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-white mb-2">还没有视频</h3>
+        <p class="text-ow-dark-muted text-sm mb-6 max-w-md mx-auto">点击上方"上传视频"按钮，或直接将视频文件拖拽到页面任意位置即可添加实战视频</p>
+        <button onclick="openUploadModal()" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-ow-orange to-ow-orange-light text-ow-dark font-semibold hover:shadow-lg hover:shadow-ow-orange/25 transition-all duration-300 cursor-pointer">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          上传第一个视频
+        </button>
+      </div>
+
+      <!-- 视频列表 -->
+      <div id="video-grid" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </section>
+
+    <!-- ====== Logo 编辑模态框 ====== -->
+    <div id="logo-edit-modal" class="hidden fixed inset-0 z-[170] flex items-center justify-center p-4" style="background: rgba(10,14,23,0.85); backdrop-filter: blur(10px);" onclick="closeLogoEditModal(event)">
+      <div class="bg-ow-dark-card border border-ow-dark-border rounded-2xl w-full max-w-md max-h-[85vh] overflow-y-auto" onclick="event.stopPropagation()">
+        <div class="flex items-center justify-between p-5 border-b border-ow-dark-border">
+          <h3 class="text-lg font-bold text-white">自定义 Logo 和直播间</h3>
+          <button onclick="closeLogoEditModal()" class="p-1.5 rounded-lg hover:bg-white/10 text-ow-dark-muted hover:text-white transition-colors cursor-pointer">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="p-5 space-y-5">
+          <!-- 导航栏小图标 -->
+          <div>
+            <label class="block text-sm font-medium text-white/80 mb-2">导航栏小图标</label>
+            <div id="nav-logo-edit-preview" class="logo-preview-area aspect-square rounded-xl border border-ow-dark-border flex items-center justify-center overflow-hidden mb-3" style="max-width:120px;">
+              <div id="nav-logo-edit-placeholder" class="text-center">
+                <svg class="w-8 h-8 text-ow-dark-muted mx-auto mb-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <span class="text-xs text-ow-dark-muted">建议上传正方形图片</span>
+              </div>
+              <img id="nav-logo-edit-preview-img" class="w-full h-full object-cover hidden" src="" alt="导航栏图标预览" />
+            </div>
+            <div class="flex items-center gap-3">
+              <label class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-ow-dark-border text-sm text-white/70 hover:border-ow-orange/40 hover:text-ow-orange transition-all cursor-pointer">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                上传图标
+                <input type="file" id="nav-logo-edit-file" accept="image/*" class="hidden" onchange="handleNavLogoFileSelect(event)" />
+              </label>
+              <button id="nav-logo-edit-clear-btn" onclick="clearNavLogoPreview()" class="px-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition-colors hidden cursor-pointer">清除</button>
+            </div>
+          </div>
+          <!-- 直播间地址 -->
+          <div>
+            <label class="block text-sm font-medium text-white/80 mb-2">直播间地址（可选）</label>
+            <input id="logo-edit-url" type="url" placeholder="https://live.bilibili.com/xxxxx" class="w-full bg-[#0A0E17] border border-ow-dark-border rounded-lg px-4 py-2.5 text-sm text-white placeholder-ow-dark-muted focus:outline-none focus:border-ow-orange/50 transition-colors" />
+            <p class="text-xs text-ow-dark-muted mt-1.5">设置后将首页"关于我们"的 Logo 作为直播间入口</p>
+            <div id="logo-edit-error" class="hidden text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-2.5 mt-2"></div>
+          </div>
+        </div>
+        <div class="flex justify-between p-5 border-t border-ow-dark-border">
+          <button onclick="resetLogoConfig()" class="px-4 py-2 rounded-lg text-sm text-ow-dark-muted hover:text-red-400 transition-colors cursor-pointer">恢复默认</button>
+          <div class="flex gap-3">
+            <button onclick="closeLogoEditModal()" class="px-4 py-2 rounded-lg border border-ow-dark-border text-sm text-ow-dark-muted hover:text-white transition-colors cursor-pointer">取消</button>
+            <button onclick="saveLogoConfig()" class="px-5 py-2 rounded-lg bg-gradient-to-r from-ow-orange to-ow-orange-light text-ow-dark text-sm font-semibold hover:shadow-lg hover:shadow-ow-orange/25 transition-all duration-300 cursor-pointer">保存</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== 页脚 ====== -->
+    <footer class="relative border-t border-ow-dark-border">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8 py-12">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+          <a href="index.html" class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-ow-orange to-ow-orange-light flex items-center justify-center">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0A0E17" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            </div>
+            <span class="font-display font-bold text-sm tracking-wider text-white/80">鱿点<span class="text-ow-orange">猫饼</span></span>
+          </a>
+          <p class="text-sm text-ow-dark-muted">&copy; 2025 Team.youdianmaobing. All rights reserved.</p>
+          <div class="flex items-center gap-6">
+            <a href="index.html" class="text-sm text-ow-dark-muted hover:text-white transition-colors">首页</a>
+            <a href="index.html#about" class="text-sm text-ow-dark-muted hover:text-white transition-colors">关于</a>
+            <a href="members.html" class="text-sm text-ow-dark-muted hover:text-white transition-colors">队员</a>
+            <a href="videos.html" class="text-sm text-ow-orange transition-colors">视频</a>
+            <a href="join.html" class="text-sm text-ow-dark-muted hover:text-white transition-colors">加入我们</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- ====== 上传模态框 ====== -->
+    <div id="upload-modal" class="modal-overlay hidden fixed inset-0 z-[100] flex items-center justify-center p-4" style="background: rgba(10,14,23,0.85); backdrop-filter: blur(8px);" onclick="closeUploadModal(event)">
+      <div class="modal-content bg-ow-dark-card border border-ow-dark-border rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+        <!-- 头部 -->
+        <div class="flex items-center justify-between p-6 border-b border-ow-dark-border">
+          <h3 class="text-lg font-display font-bold text-white">上传实战视频</h3>
+          <button onclick="closeUploadModal()" class="p-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <!-- 表单内容 -->
+        <div class="p-6 space-y-5">
+          <!-- 拖拽/点击上传区域 -->
+          <div id="drop-zone" class="upload-zone rounded-xl p-8 text-center cursor-pointer" onclick="document.getElementById('file-input').click()">
+            <svg class="w-12 h-12 mx-auto mb-3 text-ow-orange/50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            <p class="text-white text-sm font-medium mb-1">拖拽视频到此处，或点击选择文件</p>
+            <p class="text-ow-dark-muted text-xs">支持 MP4 / WebM / OGG 格式，单文件最大 500MB</p>
+            <input id="file-input" type="file" accept="video/mp4,video/webm,video/ogg" class="file-input-hidden" onchange="handleFileSelect(event)" />
+          </div>
+
+          <!-- 分割线 -->
+          <div class="flex items-center gap-3">
+            <div class="flex-1 h-px bg-ow-dark-border"></div>
+            <span class="text-xs text-ow-dark-muted">或粘贴视频链接</span>
+            <div class="flex-1 h-px bg-ow-dark-border"></div>
+          </div>
+
+          <!-- URL输入 -->
+          <div>
+            <label class="block text-sm font-medium text-white/80 mb-1.5">视频链接</label>
+            <input id="url-input" type="url" placeholder="https://example.com/video.mp4" class="w-full bg-[#0A0E17] border border-ow-dark-border rounded-lg px-4 py-2.5 text-sm text-white placeholder-ow-dark-muted focus:outline-none focus:border-ow-orange/50 transition-colors" />
+          </div>
+
+          <!-- 视频标题 -->
+          <div>
+            <label class="block text-sm font-medium text-white/80 mb-1.5">视频标题 <span class="text-red-400">*</span></label>
+            <input id="title-input" type="text" placeholder="给视频起个名字..." maxlength="50" class="w-full bg-[#0A0E17] border border-ow-dark-border rounded-lg px-4 py-2.5 text-sm text-white placeholder-ow-dark-muted focus:outline-none focus:border-ow-orange/50 transition-colors" />
+          </div>
+
+          <!-- 分类选择 -->
+          <div>
+            <label class="block text-sm font-medium text-white/80 mb-1.5">视频分类</label>
+            <select id="category-select" class="w-full bg-[#0A0E17] border border-ow-dark-border rounded-lg px-4 py-2.5 text-sm text-white focus:outline-none focus:border-ow-orange/50 transition-colors cursor-pointer">
+              <option value="击杀集锦">击杀集锦</option>
+              <option value="战术复盘">战术复盘</option>
+              <option value="支援集锦">支援集锦</option>
+              <option value="搞笑时刻">搞笑时刻</option>
+              <option value="训练赛">训练赛</option>
+              <option value="自定义">自定义</option>
+            </select>
+          </div>
+
+          <!-- 上传者 -->
+          <div>
+            <label class="block text-sm font-medium text-white/80 mb-1.5">上传者</label>
+            <input id="uploader-input" type="text" placeholder="你的游戏ID" maxlength="20" class="w-full bg-[#0A0E17] border border-ow-dark-border rounded-lg px-4 py-2.5 text-sm text-white placeholder-ow-dark-muted focus:outline-none focus:border-ow-orange/50 transition-colors" />
+          </div>
+
+          <!-- 描述 -->
+          <div>
+            <label class="block text-sm font-medium text-white/80 mb-1.5">视频描述</label>
+            <textarea id="desc-input" rows="3" placeholder="简单描述一下这个视频的内容..." maxlength="200" class="w-full bg-[#0A0E17] border border-ow-dark-border rounded-lg px-4 py-2.5 text-sm text-white placeholder-ow-dark-muted focus:outline-none focus:border-ow-orange/50 transition-colors resize-none"></textarea>
+          </div>
+
+          <!-- 上传进度 -->
+          <div id="upload-progress" class="hidden space-y-2">
+            <div class="flex items-center justify-between text-xs">
+              <span id="progress-text" class="text-ow-dark-muted">上传中...</span>
+              <span id="progress-percent" class="text-ow-orange">0%</span>
+            </div>
+            <div class="h-1.5 bg-ow-dark-border rounded-full overflow-hidden">
+              <div id="progress-fill" class="progress-bar h-full bg-gradient-to-r from-ow-orange to-ow-orange-light rounded-full" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 底部按钮 -->
+        <div class="flex items-center justify-end gap-3 p-6 border-t border-ow-dark-border">
+          <button onclick="closeUploadModal()" class="px-5 py-2.5 rounded-lg text-sm font-medium text-white/60 hover:text-white hover:bg-white/5 transition-colors cursor-pointer">取消</button>
+          <button id="submit-btn" onclick="submitVideo()" class="px-6 py-2.5 rounded-lg bg-gradient-to-r from-ow-orange to-ow-orange-light text-ow-dark text-sm font-semibold hover:shadow-lg hover:shadow-ow-orange/25 transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">确认上传</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== 播放模态框 ====== -->
+    <div id="play-modal" class="modal-overlay hidden fixed inset-0 z-[90] flex items-center justify-center p-4" style="background: rgba(10,14,23,0.9); backdrop-filter: blur(12px);" onclick="closePlayModal()">
+      <div class="modal-content relative bg-ow-dark-card border border-ow-dark-border rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden" onclick="event.stopPropagation()">
+        <!-- 关闭按钮 -->
+        <button onclick="closePlayModal()" class="absolute top-4 right-4 z-10 p-2 rounded-lg bg-black/50 hover:bg-black/70 transition-colors cursor-pointer">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <!-- 视频播放器 -->
+        <video id="play-video" class="w-full aspect-video bg-black" controls autoplay>
+          您的浏览器不支持视频播放
+        </video>
+        <!-- 视频信息 -->
+        <div class="p-5">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <h3 id="play-title" class="text-lg font-bold text-white mb-1"></h3>
+              <p id="play-meta" class="text-sm text-ow-dark-muted"></p>
+            </div>
+            <span id="play-category" class="shrink-0 px-3 py-1 rounded-full text-xs font-medium border"></span>
+          </div>
+          <p id="play-desc" class="mt-3 text-sm text-ow-dark-muted leading-relaxed"></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== Toast 通知 ====== -->
+    <div id="toast-container" class="fixed top-20 right-4 z-[200] space-y-2"></div>
+
+    <!-- ====== 登录/注册模态框 ====== -->
+    <div id="auth-modal" class="auth-modal-overlay hidden fixed inset-0 z-[150] flex items-center justify-center p-4" style="background: rgba(10,14,23,0.85); backdrop-filter: blur(10px);" onclick="closeAuthModal(event)">
+      <div class="bg-ow-dark-card border border-ow-dark-border rounded-2xl w-full max-w-md" onclick="event.stopPropagation()">
+        <div class="flex items-center border-b border-ow-dark-border">
+          <button id="auth-tab-login" class="auth-tab flex-1 py-3.5 text-sm font-semibold text-ow-orange border-b-2 border-ow-orange bg-ow-orange/5 rounded-tl-2xl transition-colors" onclick="switchAuthTab('login')">登录</button>
+          <button id="auth-tab-register" class="auth-tab flex-1 py-3.5 text-sm font-semibold text-ow-dark-muted border-b-2 border-transparent hover:text-white/80 transition-colors" onclick="switchAuthTab('register')">注册</button>
+          <button onclick="closeAuthModal()" class="p-3 hover:text-white text-ow-dark-muted transition-colors cursor-pointer">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div id="auth-form-login" class="p-6 space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-white/80 mb-1.5">用户名</label>
+            <input id="login-username" type="text" placeholder="输入用户名" class="w-full bg-[#0A0E17] border border-ow-dark-border rounded-lg px-4 py-2.5 text-sm text-white placeholder-ow-dark-muted focus:outline-none focus:border-ow-orange/50 transition-colors" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-white/80 mb-1.5">密码</label>
+            <input id="login-password" type="password" placeholder="输入密码" class="w-full bg-[#0A0E17] border border-ow-dark-border rounded-lg px-4 py-2.5 text-sm text-white placeholder-ow-dark-muted focus:outline-none focus:border-ow-orange/50 transition-colors" onkeydown="if(event.key==='Enter')handleLogin()" />
+          </div>
+          <div id="login-error" class="hidden text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-2.5"></div>
+          <button id="login-submit-btn" onclick="handleLogin()" class="w-full py-2.5 rounded-lg bg-gradient-to-r from-ow-orange to-ow-orange-light text-ow-dark text-sm font-semibold hover:shadow-lg hover:shadow-ow-orange/25 transition-all duration-300 cursor-pointer">登录</button>
+        </div>
+        <div id="auth-form-register" class="p-6 space-y-4 hidden">
+          <div>
+            <label class="block text-sm font-medium text-white/80 mb-1.5">用户名</label>
+            <input id="reg-username" type="text" placeholder="输入用户名（2-20个字符）" maxlength="20" class="w-full bg-[#0A0E17] border border-ow-dark-border rounded-lg px-4 py-2.5 text-sm text-white placeholder-ow-dark-muted focus:outline-none focus:border-ow-orange/50 transition-colors" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-white/80 mb-1.5">密码</label>
+            <input id="reg-password" type="password" placeholder="输入密码（至少4位）" class="w-full bg-[#0A0E17] border border-ow-dark-border rounded-lg px-4 py-2.5 text-sm text-white placeholder-ow-dark-muted focus:outline-none focus:border-ow-orange/50 transition-colors" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-white/80 mb-1.5">战队邀请码 <span class="text-red-400">*</span></label>
+            <input id="reg-invite" type="text" placeholder="请输入战队邀请码" class="w-full bg-[#0A0E17] border border-ow-dark-border rounded-lg px-4 py-2.5 text-sm text-white placeholder-ow-dark-muted focus:outline-none focus:border-ow-orange/50 transition-colors" onkeydown="if(event.key==='Enter')handleRegister()" />
+          </div>
+          <div id="reg-error" class="hidden text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-2.5"></div>
+          <button id="reg-submit-btn" onclick="handleRegister()" class="w-full py-2.5 rounded-lg bg-gradient-to-r from-ow-orange to-ow-orange-light text-ow-dark text-sm font-semibold hover:shadow-lg hover:shadow-ow-orange/25 transition-all duration-300 cursor-pointer">注册加入战队</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== 全局拖拽上传 ====== -->
+    <div id="global-drop-overlay" class="hidden fixed inset-0 z-[80] flex items-center justify-center" style="background: rgba(10,14,23,0.8); backdrop-filter: blur(8px);">
+      <div class="text-center">
+        <svg class="w-16 h-16 mx-auto mb-4 text-ow-orange animate-float" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        <p class="text-xl font-display font-bold text-white">释放文件以开始上传</p>
+        <p class="text-sm text-ow-dark-muted mt-2">支持 MP4 / WebM / OGG 视频格式</p>
+      </div>
+    </div>
+
+    <!-- Logo & 直播间配置 -->
+    <script>
+        const SITE_CONFIG_KEY = 'ydmb_site_config';
+
+        function getSiteConfig() {
+          try { return JSON.parse(localStorage.getItem(SITE_CONFIG_KEY) || '{}'); } catch(e) { return {}; }
+        }
+
+        function saveSiteConfig(config) {
+          localStorage.setItem(SITE_CONFIG_KEY, JSON.stringify(config));
+        }
+
+        function applySiteConfig() {
+          const config = getSiteConfig();
+          const navLogoImg = document.getElementById('nav-logo-img');
+          const navLogoSvg = document.getElementById('nav-logo-svg');
+          if (config.navLogoDataURL && navLogoImg) {
+            navLogoImg.src = config.navLogoDataURL;
+            navLogoImg.classList.remove('hidden');
+            if (navLogoSvg) navLogoSvg.classList.add('hidden');
+          } else {
+            if (navLogoImg) { navLogoImg.classList.add('hidden'); navLogoImg.src = ''; }
+            if (navLogoSvg) navLogoSvg.classList.remove('hidden');
+          }
+        }
+
+        let tempNavLogoDataURL = null;
+
+        function openLogoEditModal() {
+          const config = getSiteConfig();
+          const modal = document.getElementById('logo-edit-modal');
+          const urlInput = document.getElementById('logo-edit-url');
+          const errEl = document.getElementById('logo-edit-error');
+
+          tempNavLogoDataURL = config.navLogoDataURL || null;
+          const navPreviewImg = document.getElementById('nav-logo-edit-preview-img');
+          const navPlaceholder = document.getElementById('nav-logo-edit-placeholder');
+          const navClearBtn = document.getElementById('nav-logo-edit-clear-btn');
+
+          if (config.navLogoDataURL && navPreviewImg) {
+            navPreviewImg.src = config.navLogoDataURL;
+            navPreviewImg.classList.remove('hidden');
+            if (navPlaceholder) navPlaceholder.classList.add('hidden');
+            if (navClearBtn) navClearBtn.classList.remove('hidden');
+          } else {
+            if (navPreviewImg) { navPreviewImg.classList.add('hidden'); navPreviewImg.src = ''; }
+            if (navPlaceholder) navPlaceholder.classList.remove('hidden');
+            if (navClearBtn) navClearBtn.classList.add('hidden');
+          }
+
+          if (urlInput) urlInput.value = config.liveURL || '';
+          if (errEl) errEl.classList.add('hidden');
+
+          if (modal) {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+          }
+        }
+
+        function closeLogoEditModal(event) {
+          if (event && event.target !== event.currentTarget) return;
+          const modal = document.getElementById('logo-edit-modal');
+          if (modal) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+          }
+        }
+
+        function handleNavLogoFileSelect(event) {
+          const file = event.target.files[0];
+          if (!file) return;
+
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            tempNavLogoDataURL = e.target.result;
+
+            const previewImg = document.getElementById('nav-logo-edit-preview-img');
+            const placeholder = document.getElementById('nav-logo-edit-placeholder');
+            const clearBtn = document.getElementById('nav-logo-edit-clear-btn');
+
+            if (previewImg) {
+              previewImg.src = tempNavLogoDataURL;
+              previewImg.classList.remove('hidden');
+            }
+            if (placeholder) placeholder.classList.add('hidden');
+            if (clearBtn) clearBtn.classList.remove('hidden');
+          };
+          reader.readAsDataURL(file);
+        }
+
+        function clearNavLogoPreview() {
+          tempNavLogoDataURL = null;
+          const previewImg = document.getElementById('nav-logo-edit-preview-img');
+          const placeholder = document.getElementById('nav-logo-edit-placeholder');
+          const clearBtn = document.getElementById('nav-logo-edit-clear-btn');
+          const fileInput = document.getElementById('nav-logo-edit-file');
+
+          if (previewImg) { previewImg.classList.add('hidden'); previewImg.src = ''; }
+          if (placeholder) placeholder.classList.remove('hidden');
+          if (clearBtn) clearBtn.classList.add('hidden');
+          if (fileInput) fileInput.value = '';
+        }
+
+        function saveLogoConfig() {
+          const urlInput = document.getElementById('logo-edit-url');
+          const errEl = document.getElementById('logo-edit-error');
+          const liveURL = urlInput ? urlInput.value.trim() : '';
+
+          if (liveURL && !/^https?:\/\/.+/.test(liveURL)) {
+            if (errEl) { errEl.textContent = '请输入有效的直播间地址（以 http:// 或 https:// 开头）'; errEl.classList.remove('hidden'); }
+            return;
+          }
+
+          if (errEl) errEl.classList.add('hidden');
+
+          const config = getSiteConfig();
+          config.navLogoDataURL = tempNavLogoDataURL || null;
+          config.liveURL = liveURL || null;
+          saveSiteConfig(config);
+          applySiteConfig();
+          closeLogoEditModal();
+          showToast('配置已保存', 'success');
+        }
+
+        function resetLogoConfig() {
+          if (confirm('确定恢复默认图标和直播间设置？')) {
+            const config = getSiteConfig();
+            config.navLogoDataURL = null;
+            config.liveURL = null;
+            saveSiteConfig(config);
+            applySiteConfig();
+            closeLogoEditModal();
+            showToast('已恢复默认设置', 'info');
+          }
+        }
+
+        // 初始化
+        applySiteConfig();
+    </script>
+
+    <!-- ====== JavaScript ====== -->
+    <script>
+      // ==========================================
+      //  IndexedDB 层 — 持久化存储视频文件二进制数据
+      // ==========================================
+      const DB_NAME = 'ydmb_video_db';
+      const DB_VERSION = 1;
+      const BLOB_STORE = 'video_blobs';
+
+      function openDB() {
+        return new Promise((resolve, reject) => {
+          const request = indexedDB.open(DB_NAME, DB_VERSION);
+          request.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(BLOB_STORE)) {
+              db.createObjectStore(BLOB_STORE, { keyPath: 'id' });
+            }
+          };
+          request.onsuccess = (e) => resolve(e.target.result);
+          request.onerror = (e) => reject(e.target.error);
+        });
+      }
+
+      async function storeVideoBlob(id, blob) {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(BLOB_STORE, 'readwrite');
+          tx.objectStore(BLOB_STORE).put({ id, blob });
+          tx.oncomplete = () => resolve();
+          tx.onerror = (e) => reject(e.target.error);
+        });
+      }
+
+      async function getVideoBlob(id) {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(BLOB_STORE, 'readonly');
+          const req = tx.objectStore(BLOB_STORE).get(id);
+          req.onsuccess = () => resolve(req.result ? req.result.blob : null);
+          req.onerror = (e) => reject(e.target.error);
+        });
+      }
+
+      async function deleteVideoBlob(id) {
+        const db = await openDB();
+        return new Promise((resolve, reject) => {
+          const tx = db.transaction(BLOB_STORE, 'readwrite');
+          tx.objectStore(BLOB_STORE).delete(id);
+          tx.oncomplete = () => resolve();
+          tx.onerror = (e) => reject(e.target.error);
+        });
+      }
+
+      // 缓存已解析的 blob URL（id → { url, blob }），避免重复构造
+      const blobUrlCache = {};
+
+      // 从 IndexedDB 取出 blob 并创建可用的 blob URL
+      async function getPlayableUrl(video) {
+        // 如果是文件类型，从 IDB 动态生成 blob URL
+        if (video.type === 'file') {
+          // 已有缓存且未失效，直接复用
+          if (blobUrlCache[video.id]) {
+            return blobUrlCache[video.id].url;
+          }
+          try {
+            const blob = await getVideoBlob(video.id);
+            if (blob) {
+              const url = URL.createObjectURL(blob);
+              blobUrlCache[video.id] = { url, blob };
+              return url;
+            }
+          } catch (e) {
+            console.error('读取视频文件失败:', e);
+          }
+          return null;
+        }
+        // 旧数据（无 type 字段）或 URL 类型 — url 字段直接就是链接
+        return video.url || null;
+      }
+
+      // 播放完后清理缓存的 blob URL
+      function revokeCachedUrl(id) {
+        if (blobUrlCache[id]) {
+          URL.revokeObjectURL(blobUrlCache[id].url);
+          delete blobUrlCache[id];
+        }
+      }
+
+      // ==========================================
+      //  localStorage 元数据管理
+      // ==========================================
+      const STORAGE_KEY = 'ydmb_videos';
+
+      function loadVideos() {
+        try {
+          const data = localStorage.getItem(STORAGE_KEY);
+          return data ? JSON.parse(data) : [];
+        } catch (e) {
+          return [];
+        }
+      }
+
+      function saveVideos(videos) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(videos));
+      }
+
+      let videos = loadVideos();
+      let currentFilter = 'all';
+      let searchQuery = '';
+      let selectedFile = null;
+
+      // ==========================================
+      //  认证系统 (Auth Module)
+      // ==========================================
+      const AUTH_KEY = 'ydmb_users';
+      const SESSION_KEY = 'ydmb_session';
+      const INVITE_CODE = 'owydmb';
+
+      async function hashPwd(pwd) {
+        const enc = new TextEncoder();
+        const data = enc.encode(pwd + 'ydmb_salt');
+        const hashBuf = await crypto.subtle.digest('SHA-256', data);
+        return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2,'0')).join('');
+      }
+
+      function getUsers() { try { return JSON.parse(localStorage.getItem(AUTH_KEY)||'[]'); } catch(e){ return []; } }
+      function saveUsersArr(u) { localStorage.setItem(AUTH_KEY, JSON.stringify(u)); }
+      function getSession() { try { return JSON.parse(localStorage.getItem(SESSION_KEY)||'null'); } catch(e){ return null; } }
+      function setSession(s) { if(s) localStorage.setItem(SESSION_KEY, JSON.stringify(s)); else localStorage.removeItem(SESSION_KEY); }
+
+      function isLoggedIn() { return !!getSession(); }
+      function isAdmin() { const s = getSession(); return s && s.role==='admin'; }
+      function getCurrUser() { return getSession(); }
+
+      function doLogout() {
+        setSession(null);
+        updateAuthUI();
+        showToast('已退出登录', 'info');
+        renderVideos();
+      }
+
+      function isVideoOwner(video) {
+        const s = getSession();
+        if(!s) return false;
+        return video.uploaderId===s.id || video.uploader===s.username;
+      }
+
+      function canDeleteVideo(video) {
+        const s = getSession();
+        if(!s) return false;
+        if(s.role==='admin') return true;
+        return isVideoOwner(video);
+      }
+
+      function canUploadVideo() { return isLoggedIn(); }
+
+      // ====== 修复：updateAuthUI — 解决退出登录后用户信息仍然显示的问题 ======
+      function updateAuthUI() {
+        const session = getSession();
+        const loginBtn = document.getElementById('nav-login-btn');
+        const uploadBtn = document.getElementById('nav-upload-btn');
+        const userInfo = document.getElementById('nav-user-info');
+        const roleBadge = document.getElementById('nav-role-badge');
+        const usernameEl = document.getElementById('nav-username');
+        const mobileLoginBtn = document.getElementById('mobile-login-btn');
+        const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
+        const mobileUploadBtn = document.getElementById('mobile-upload-btn');
+
+        if(session) {
+          // 已登录：隐藏登录按钮，显示用户信息和上传按钮
+          loginBtn.classList.add('!hidden');
+          uploadBtn.classList.remove('hidden');
+          userInfo.classList.remove('hidden', '!hidden');  // 同时移除 hidden 和 !hidden，让 md:flex 生效
+          roleBadge.textContent = session.role==='admin'?'管理员':'队员';
+          roleBadge.className = 'text-xs px-2 py-0.5 rounded-full font-medium border ' + (session.role==='admin'?'border-ow-orange/50 text-ow-orange bg-ow-orange/10':'border-ow-blue/50 text-ow-blue bg-ow-blue/10');
+          usernameEl.textContent = session.username;
+          mobileLoginBtn.classList.add('hidden');
+          mobileLogoutBtn.classList.remove('hidden');
+          mobileUploadBtn.classList.remove('hidden');
+          // Logo 编辑按钮（管理员可见）
+          const navLogoEditBtn = document.getElementById('nav-logo-edit-btn');
+          if(navLogoEditBtn) { navLogoEditBtn.classList.toggle('hidden', session.role!=='admin'); }
+        } else {
+          // 未登录：显示登录按钮，隐藏用户信息和上传按钮
+          loginBtn.classList.remove('!hidden');             // 只移除 !hidden，保留 hidden 用于移动端
+          uploadBtn.classList.add('hidden');
+          userInfo.classList.add('!hidden');                // 用 !hidden 强制隐藏，覆盖 md:flex
+          mobileLoginBtn.classList.remove('hidden');
+          mobileLogoutBtn.classList.add('hidden');
+          mobileUploadBtn.classList.add('hidden');
+          // 隐藏 Logo 编辑按钮
+          const navLogoEditBtn = document.getElementById('nav-logo-edit-btn');
+          if(navLogoEditBtn) { navLogoEditBtn.classList.add('hidden'); }
+        }
+      }
+
+      // 打开认证模态框
+      function openAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); document.body.style.overflow='hidden'; switchAuthTab('login'); resetAuthForms(); }
+      function closeAuthModal(event) { if(event && event.target!==event.currentTarget) return; document.getElementById('auth-modal').classList.add('hidden'); document.body.style.overflow=''; }
+
+      function switchAuthTab(tab) {
+        const loginTab = document.getElementById('auth-tab-login');
+        const regTab = document.getElementById('auth-tab-register');
+        const loginForm = document.getElementById('auth-form-login');
+        const regForm = document.getElementById('auth-form-register');
+        resetAuthForms();
+        if(tab==='login') {
+          loginTab.className = 'auth-tab flex-1 py-3.5 text-sm font-semibold text-ow-orange border-b-2 border-ow-orange bg-ow-orange/5 rounded-tl-2xl transition-colors';
+          regTab.className = 'auth-tab flex-1 py-3.5 text-sm font-semibold text-ow-dark-muted border-b-2 border-transparent hover:text-white/80 transition-colors';
+          loginForm.classList.remove('hidden');
+          regForm.classList.add('hidden');
+        } else {
+          regTab.className = 'auth-tab flex-1 py-3.5 text-sm font-semibold text-ow-orange border-b-2 border-ow-orange bg-ow-orange/5 transition-colors';
+          loginTab.className = 'auth-tab flex-1 py-3.5 text-sm font-semibold text-ow-dark-muted border-b-2 border-transparent hover:text-white/80 transition-colors rounded-tl-2xl';
+          regForm.classList.remove('hidden');
+          loginForm.classList.add('hidden');
+        }
+      }
+
+      function resetAuthForms() {
+        document.getElementById('login-username').value='';
+        document.getElementById('login-password').value='';
+        document.getElementById('reg-username').value='';
+        document.getElementById('reg-password').value='';
+        document.getElementById('reg-invite').value='';
+        document.getElementById('login-error').classList.add('hidden');
+        document.getElementById('reg-error').classList.add('hidden');
+      }
+
+      async function handleLogin() {
+        const username = document.getElementById('login-username').value.trim();
+        const password = document.getElementById('login-password').value;
+        const errEl = document.getElementById('login-error');
+        const btn = document.getElementById('login-submit-btn');
+        if(!username||!password){ errEl.classList.remove('hidden'); errEl.textContent='请填写用户名和密码'; return; }
+        btn.disabled=true; btn.textContent='登录中...';
+        const users = getUsers();
+        const user = users.find(u=>u.username===username);
+        if(!user){ errEl.classList.remove('hidden'); errEl.textContent='用户名不存在'; btn.disabled=false; btn.textContent='登录'; return; }
+        const hash = await hashPwd(password);
+        if(hash!==user.passwordHash){ errEl.classList.remove('hidden'); errEl.textContent='密码错误'; btn.disabled=false; btn.textContent='登录'; return; }
+        setSession({id:user.id, username:user.username, role:user.role});
+        errEl.classList.add('hidden');
+        closeAuthModal();
+        updateAuthUI();
+        showToast('登录成功！欢迎回来，'+user.username,'success');
+        renderVideos();
+        btn.disabled=false; btn.textContent='登录';
+      }
+
+      async function handleRegister() {
+        const username = document.getElementById('reg-username').value.trim();
+        const password = document.getElementById('reg-password').value;
+        const invite = document.getElementById('reg-invite').value.trim();
+        const errEl = document.getElementById('reg-error');
+        const btn = document.getElementById('reg-submit-btn');
+        if(!username||!password){ errEl.classList.remove('hidden'); errEl.textContent='请填写用户名和密码'; return; }
+        if(username.length<2||username.length>20){ errEl.classList.remove('hidden'); errEl.textContent='用户名2-20个字符'; return; }
+        if(password.length<4){ errEl.classList.remove('hidden'); errEl.textContent='密码至少4位'; return; }
+        if(invite!==INVITE_CODE){ errEl.classList.remove('hidden'); errEl.textContent='邀请码错误'; return; }
+        btn.disabled=true; btn.textContent='注册中...';
+        const users = getUsers();
+        if(users.find(u=>u.username===username)){ errEl.classList.remove('hidden'); errEl.textContent='用户名已存在'; btn.disabled=false; btn.textContent='注册加入战队'; return; }
+        const hash = await hashPwd(password);
+        const isFirst = users.length===0;
+        const newUser = { id:'u_'+Date.now().toString(36)+'_'+Math.random().toString(36).substr(2,6), username, passwordHash:hash, role:isFirst?'admin':'member', createdAt:new Date().toISOString() };
+        users.push(newUser); saveUsersArr(users);
+        setSession({id:newUser.id, username:newUser.username, role:newUser.role});
+        errEl.classList.add('hidden');
+        closeAuthModal();
+        updateAuthUI();
+        showToast('注册成功！欢迎加入战队'+(isFirst?'（你已成为管理员）':''),'success');
+        renderVideos();
+        btn.disabled=false; btn.textContent='注册加入战队';
+      }
+
+      // ==========================================
+      //  工具函数
+      // ==========================================
+      function generateId() {
+        return 'v_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 6);
+      }
+
+      function formatTime(seconds) {
+        const m = Math.floor(seconds / 60);
+        const s = Math.floor(seconds % 60);
+        return `${m}:${s.toString().padStart(2, '0')}`;
+      }
+
+      function formatDate(dateStr) {
+        const d = new Date(dateStr);
+        const now = new Date();
+        const diff = now - d;
+        if (diff < 60000) return '刚刚';
+        if (diff < 3600000) return `${Math.floor(diff / 60000)}分钟前`;
+        if (diff < 86400000) return `${Math.floor(diff / 3600000)}小时前`;
+        if (diff < 604800000) return `${Math.floor(diff / 86400000)}天前`;
+        return d.toLocaleDateString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit' });
+      }
+
+      function formatViews(views) {
+        if (views >= 10000) return (views / 10000).toFixed(1) + '万';
+        if (views >= 1000) return (views / 1000).toFixed(1) + 'k';
+        return views.toString();
+      }
+
+      function escapeHtml(str) {
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      }
+
+      function getCategoryStyle(category) {
+        const styles = {
+          '击杀集锦': 'border-red-500/40 text-red-400 bg-red-500/10',
+          '战术复盘': 'border-blue-500/40 text-blue-400 bg-blue-500/10',
+          '支援集锦': 'border-green-500/40 text-green-400 bg-green-500/10',
+          '搞笑时刻': 'border-yellow-500/40 text-yellow-400 bg-yellow-500/10',
+          '训练赛': 'border-purple-500/40 text-purple-400 bg-purple-500/10',
+          '自定义': 'border-ow-orange/40 text-ow-orange bg-ow-orange/10',
+        };
+        return styles[category] || 'border-ow-dark-border text-ow-dark-muted bg-ow-dark-card';
+      }
+
+      function showToast(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        const colors = {
+          success: 'border-green-500/50 bg-green-500/10 text-green-400',
+          error: 'border-red-500/50 bg-red-500/10 text-red-400',
+          info: 'border-ow-orange/50 bg-ow-orange/10 text-ow-orange',
+        };
+        toast.className = `toast px-4 py-3 rounded-xl border text-sm flex items-center gap-2 ${colors[type] || colors.info}`;
+        toast.innerHTML = `<span>${type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ'}</span><span>${escapeHtml(message)}</span>`;
+        container.appendChild(toast);
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateY(-10px)';
+          toast.style.transition = 'all 0.3s ease';
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
+      }
+
+      // ==========================================
+      //  缩略图 — 用 Canvas 绘制的可靠占位图
+      // ==========================================
+      function makeThumbnailDataUrl(video) {
+        if (video.thumbnail) return video.thumbnail;
+        const catColors = {
+          '击杀集锦': '#ef4444',
+          '战术复盘': '#3b82f6',
+          '支援集锦': '#22c55e',
+          '搞笑时刻': '#eab308',
+          '训练赛': '#a855f7',
+          '自定义': '#FA9C1B',
+        };
+        const color = catColors[video.category] || '#FA9C1B';
+        const w = 400, h = 225;
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        // 背景
+        ctx.fillStyle = '#111827';
+        ctx.fillRect(0, 0, w, h);
+        // 播放三角
+        ctx.fillStyle = color;
+        ctx.globalAlpha = 0.85;
+        ctx.beginPath();
+        ctx.moveTo(w / 2 - 22, h / 2 - 28);
+        ctx.lineTo(w / 2 + 26, h / 2);
+        ctx.lineTo(w / 2 - 22, h / 2 + 28);
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        // 底部色条
+        ctx.fillStyle = color;
+        ctx.globalAlpha = 0.35;
+        ctx.fillRect(0, h - 28, w, 28);
+        ctx.globalAlpha = 1;
+        // 分类文字
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 13px "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(video.category, w / 2, h - 14);
+        return canvas.toDataURL('image/jpeg', 0.8);
+      }
+
+      // ==========================================
+      //  渲染视频列表
+      // ==========================================
+      function renderVideos() {
+        const grid = document.getElementById('video-grid');
+        const empty = document.getElementById('empty-state');
+
+        let filtered = videos;
+        if (currentFilter !== 'all') {
+          filtered = filtered.filter(v => v.category === currentFilter);
+        }
+        if (searchQuery) {
+          const q = searchQuery.toLowerCase();
+          filtered = filtered.filter(v =>
+            v.title.toLowerCase().includes(q) ||
+            v.uploader.toLowerCase().includes(q) ||
+            v.category.toLowerCase().includes(q) ||
+            (v.desc && v.desc.toLowerCase().includes(q))
+          );
+        }
+
+        const today = new Date().toDateString();
+        const todayUploads = videos.filter(v => new Date(v.createdAt).toDateString() === today).length;
+        const totalViews = videos.reduce((sum, v) => sum + (v.views || 0), 0);
+        document.getElementById('total-count').textContent = videos.length;
+        document.getElementById('total-views').textContent = formatViews(totalViews);
+        document.getElementById('today-uploads').textContent = todayUploads;
+
+        if (videos.length === 0) {
+          empty.classList.remove('hidden');
+          grid.classList.add('hidden');
+          return;
+        }
+
+        empty.classList.add('hidden');
+        grid.classList.remove('hidden');
+
+        if (filtered.length === 0) {
+          grid.innerHTML = `<div class="col-span-full text-center py-16"><p class="text-ow-dark-muted">没有找到匹配的视频</p></div>`;
+          return;
+        }
+
+        grid.innerHTML = filtered.map(video => {
+          const thumb = makeThumbnailDataUrl(video);
+          const titleSafe = escapeHtml(video.title);
+          const uploaderSafe = escapeHtml(video.uploader || '匿名');
+          const categorySafe = escapeHtml(video.category);
+          const duration = video.duration || '--:--';
+          const catStyle = getCategoryStyle(video.category);
+          const viewsStr = formatViews(video.views || 0);
+          const dateStr = formatDate(video.createdAt);
+
+          return `
+          <div class="video-card bg-ow-dark-card border border-ow-dark-border rounded-xl overflow-hidden group cursor-pointer" data-video-id="${video.id}" onclick="playVideo('${video.id}')">
+            <div class="relative overflow-hidden aspect-video">
+              <img class="video-thumb w-full h-full object-cover" src="${thumb}" alt="${titleSafe}" loading="lazy" />
+              <div class="video-play-btn absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 rounded-full bg-ow-orange/90 flex items-center justify-center shadow-lg">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><polygon points="8,5 19,12 8,19"/></svg>
+              </div>
+              <span class="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/70 text-xs text-white font-medium">${duration}</span>
+              <span class="absolute top-2 left-2 px-2 py-0.5 rounded text-xs font-medium border ${catStyle}">${categorySafe}</span>
+              ${canDeleteVideo(video) ? `<button class="delete-btn absolute top-2 right-2 p-1.5 rounded-lg bg-red-500/80 hover:bg-red-500 text-white cursor-pointer" onclick="event.stopPropagation(); deleteVideo('${video.id}')" title="删除视频">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              </button>` : ''}
+            </div>
+            <div class="p-4">
+              <h3 class="font-semibold text-white text-sm leading-tight mb-2" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${titleSafe}</h3>
+              <div class="flex items-center justify-between text-xs text-ow-dark-muted">
+                <span>${uploaderSafe}</span>
+                <span>${viewsStr} 播放 · ${dateStr}</span>
+              </div>
+            </div>
+          </div>`;
+        }).join('');
+
+        grid.querySelectorAll('.video-card').forEach((card, i) => {
+          card.style.animation = `slideUp 0.5s ease-out ${i * 0.05}s both`;
+        });
+      }
+
+      // ==========================================
+      //  上传模态框
+      // ==========================================
+      function openUploadModal() {
+        if(!isLoggedIn()){ showToast('请先登录后再上传视频','error'); openAuthModal(); return; }
+        document.getElementById('upload-modal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        resetUploadForm();
+      }
+
+      function closeUploadModal(event) {
+        if (event && event.target !== event.currentTarget) return;
+        document.getElementById('upload-modal').classList.add('hidden');
+        document.body.style.overflow = '';
+        resetUploadForm();
+      }
+
+      function resetUploadForm() {
+        const session = getSession();
+        document.getElementById('title-input').value = '';
+        document.getElementById('url-input').value = '';
+        document.getElementById('category-select').value = '击杀集锦';
+        document.getElementById('uploader-input').value = session ? session.username : '';
+        document.getElementById('desc-input').value = '';
+        document.getElementById('file-input').value = '';
+        document.getElementById('upload-progress').classList.add('hidden');
+        selectedFile = null;
+      }
+
+      // ==========================================
+      //  文件选择处理
+      // ==========================================
+      function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (file) processSelectedFile(file);
+      }
+
+      function processSelectedFile(file) {
+        if (!file.type.startsWith('video/')) {
+          showToast('请选择视频文件 (MP4/WebM/OGG)', 'error');
+          return;
+        }
+        if (file.size > 500 * 1024 * 1024) {
+          showToast('文件大小不能超过 500MB', 'error');
+          return;
+        }
+        selectedFile = file;
+        if (!document.getElementById('title-input').value) {
+          document.getElementById('title-input').value = file.name.replace(/\.[^/.]+$/, '');
+        }
+        document.getElementById('url-input').value = '';
+      }
+
+      // ==========================================
+      //  生成缩略图（从视频文件中提取一帧）
+      // ==========================================
+      function captureThumbnail(file) {
+        return new Promise((resolve) => {
+          const video = document.createElement('video');
+          video.preload = 'metadata';
+          video.muted = true;
+          video.playsInline = true;
+          let resolved = false;
+
+          const doCapture = () => {
+            if (resolved) return;
+            resolved = true;
+            try {
+              const canvas = document.createElement('canvas');
+              canvas.width = 400;
+              canvas.height = 225;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(video, 0, 0, 400, 225);
+              URL.revokeObjectURL(video.src);
+              resolve(canvas.toDataURL('image/jpeg', 0.75));
+            } catch (e) {
+              URL.revokeObjectURL(video.src);
+              resolve(null);
+            }
+          };
+
+          video.onloadeddata = () => {
+            video.currentTime = Math.min(1, video.duration / 3 || 1);
+          };
+          video.onseeked = () => doCapture();
+          video.onerror = () => {
+            if (!resolved) { resolved = true; URL.revokeObjectURL(video.src); resolve(null); }
+          };
+          // 超时兜底
+          setTimeout(() => { if (!resolved) doCapture(); }, 5000);
+          video.src = URL.createObjectURL(file);
+        });
+      }
+
+      // ==========================================
+      //  提交视频（核心：文件 → IndexedDB / URL → 直接存）
+      // ==========================================
+      async function submitVideo() {
+        const title = document.getElementById('title-input').value.trim();
+        const url = document.getElementById('url-input').value.trim();
+        const category = document.getElementById('category-select').value;
+        const uploader = document.getElementById('uploader-input').value.trim();
+        const desc = document.getElementById('desc-input').value.trim();
+
+        if (!title) { showToast('请输入视频标题', 'error'); return; }
+        if (!selectedFile && !url) { showToast('请选择视频文件或粘贴视频链接', 'error'); return; }
+
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = '上传中...';
+
+        const session = getSession();
+        const videoData = {
+          id: generateId(),
+          title,
+          category,
+          uploader: uploader || (session ? session.username : '匿名'),
+          uploaderId: session ? session.id : '',
+          desc,
+          createdAt: new Date().toISOString(),
+          views: 0,
+          type: 'url',       // 默认 URL，文件上传时改为 'file'
+          url: '',           // URL 或 标记值（文件类型存 'idb://' + id）
+          thumbnail: '',
+          duration: '--:--',
+        };
+
+        try {
+          if (selectedFile) {
+            // --- 文件上传流程 ---
+            // 1) 显示进度
+            const progressDiv = document.getElementById('upload-progress');
+            const progressFill = document.getElementById('progress-fill');
+            const progressPercent = document.getElementById('progress-percent');
+            progressDiv.classList.remove('hidden');
+
+            let progress = 0;
+            const interval = setInterval(() => {
+              progress += Math.random() * 20;
+              if (progress >= 100) progress = 100;
+              progressFill.style.width = progress + '%';
+              progressPercent.textContent = Math.floor(progress) + '%';
+            }, 120);
+
+            // 2) 并行：存 blob + 获取时长 + 生成缩略图
+            const file = selectedFile;
+            const [_, duration, thumbnail] = await Promise.all([
+              storeVideoBlob(videoData.id, file),
+              new Promise((resolve) => {
+                const v = document.createElement('video');
+                v.preload = 'metadata';
+                v.onloadedmetadata = () => { resolve(formatTime(v.duration || 0)); URL.revokeObjectURL(v.src); };
+                v.onerror = () => { resolve('--:--'); URL.revokeObjectURL(v.src); };
+                v.src = URL.createObjectURL(file);
+              }),
+              captureThumbnail(file),
+            ]);
+
+            clearInterval(interval);
+            progressFill.style.width = '100%';
+            progressPercent.textContent = '100%';
+
+            videoData.type = 'file';
+            videoData.url = 'idb://' + videoData.id;  // 标记
+            videoData.duration = duration;
+            videoData.thumbnail = thumbnail || '';
+
+            // 预缓存当前 session 的 blob URL
+            blobUrlCache[videoData.id] = { url: URL.createObjectURL(file), blob: file };
+
+            videos.unshift(videoData);
+            saveVideos(videos);
+            renderVideos();
+            closeUploadModal();
+            showToast('视频上传成功！', 'success');
+          } else {
+            // --- URL 上传流程 ---
+            videoData.type = 'url';
+            videoData.url = url;
+
+            const tempVideo = document.createElement('video');
+            tempVideo.preload = 'metadata';
+            tempVideo.crossOrigin = 'anonymous';
+            tempVideo.onloadedmetadata = () => {
+              videoData.duration = formatTime(tempVideo.duration || 0);
+              tempVideo.remove();
+              videos.unshift(videoData);
+              saveVideos(videos);
+              renderVideos();
+              closeUploadModal();
+              showToast('视频添加成功！', 'success');
+              submitBtn.disabled = false;
+              submitBtn.textContent = '确认上传';
+            };
+            tempVideo.onerror = () => {
+              videoData.url = url;
+              tempVideo.remove();
+              videos.unshift(videoData);
+              saveVideos(videos);
+              renderVideos();
+              closeUploadModal();
+              showToast('视频添加成功（无法读取时长）', 'success');
+              submitBtn.disabled = false;
+              submitBtn.textContent = '确认上传';
+            };
+            tempVideo.src = url;
+            return; // 不执行后面的 reset，让回调自己处理
+          }
+        } catch (err) {
+          console.error('上传失败:', err);
+          showToast('上传失败: ' + err.message, 'error');
+        }
+
+        submitBtn.disabled = false;
+        submitBtn.textContent = '确认上传';
+      }
+
+      // ==========================================
+      //  播放视频（异步获取播放地址）
+      // ==========================================
+      async function playVideo(id) {
+        const video = videos.find(v => v.id === id);
+        if (!video) return;
+
+        video.views = (video.views || 0) + 1;
+        saveVideos(videos);
+
+        const modal = document.getElementById('play-modal');
+        const player = document.getElementById('play-video');
+
+        // 先显示基本信息
+        document.getElementById('play-title').textContent = video.title;
+        document.getElementById('play-meta').textContent = `${video.uploader || '匿名'} · ${formatViews(video.views)} 播放 · ${formatDate(video.createdAt)}`;
+        document.getElementById('play-desc').textContent = video.desc || '暂无描述';
+        const catEl = document.getElementById('play-category');
+        catEl.textContent = video.category;
+        catEl.className = 'shrink-0 px-3 py-1 rounded-full text-xs font-medium border ' + getCategoryStyle(video.category);
+
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+
+        // 异步获取可播放的 URL
+        player.src = '';
+        const playableUrl = await getPlayableUrl(video);
+        if (playableUrl) {
+          player.src = playableUrl;
+          player.load();
+          player.play().catch(() => { /* 自动播放被拦截，用户可手动点击 */ });
+        } else {
+          player.poster = makeThumbnailDataUrl(video);
+          showToast('视频文件加载失败，可能已被删除或链接失效', 'error');
+        }
+
+        // 播放出错时的兜底
+        player.onerror = () => {
+          if (player.src && !player.src.startsWith('blob:')) {
+            // URL 类型的不用特殊处理，浏览器会显示错误
+            return;
+          }
+          showToast('视频播放失败', 'error');
+        };
+
+        renderVideos();
+      }
+
+      function closePlayModal() {
+        const modal = document.getElementById('play-modal');
+        const player = document.getElementById('play-video');
+        player.pause();
+        player.src = '';
+        player.onerror = null;
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+
+      // ==========================================
+      //  删除视频（同时清理 IndexedDB）
+      // ==========================================
+      async function deleteVideo(id) {
+        const video = videos.find(v => v.id === id);
+        if(!video) return;
+        if(!canDeleteVideo(video)){ showToast('你没有权限删除此视频（仅可删除自己上传的视频，管理员可删除所有视频）','error'); return; }
+        if (!confirm('确定要删除这个视频吗？此操作不可撤销。')) return;
+        // 清理 blob URL 缓存
+        revokeCachedUrl(id);
+        // 清理 IndexedDB 中的文件
+        if (video.type === 'file') {
+          await deleteVideoBlob(id).catch(() => {});
+        }
+        videos = videos.filter(v => v.id !== id);
+        saveVideos(videos);
+        renderVideos();
+        showToast('视频已删除', 'info');
+      }
+
+      // ==========================================
+      //  筛选
+      // ==========================================
+      document.getElementById('filter-tabs').addEventListener('click', (e) => {
+        const tab = e.target.closest('.filter-tab');
+        if (!tab) return;
+        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentFilter = tab.dataset.filter;
+        renderVideos();
+      });
+
+      // ==========================================
+      //  搜索
+      // ==========================================
+      let searchTimeout;
+      document.getElementById('search-input').addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          searchQuery = e.target.value.trim();
+          renderVideos();
+        }, 300);
+      });
+
+      // ==========================================
+      //  拖拽上传（模态框内 + 全局）
+      // ==========================================
+      const dropZone = document.getElementById('drop-zone');
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('drag-over');
+      });
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('drag-over');
+      });
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file) processSelectedFile(file);
+      });
+
+      const globalOverlay = document.getElementById('global-drop-overlay');
+      let dragCounter = 0;
+
+      document.addEventListener('dragenter', (e) => {
+        e.preventDefault();
+        dragCounter++;
+        if (dragCounter === 1) globalOverlay.classList.remove('hidden');
+      });
+      document.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        dragCounter--;
+        if (dragCounter === 0) globalOverlay.classList.add('hidden');
+      });
+      document.addEventListener('dragover', (e) => { e.preventDefault(); });
+      document.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dragCounter = 0;
+        globalOverlay.classList.add('hidden');
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('video/')) {
+          if(!isLoggedIn()){ showToast('请先登录后再上传视频','error'); openAuthModal(); return; }
+          openUploadModal();
+          setTimeout(() => processSelectedFile(file), 100);
+        }
+      });
+
+      // ==========================================
+      //  键盘快捷键
+      // ==========================================
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          const uploadModal = document.getElementById('upload-modal');
+          const playModal = document.getElementById('play-modal');
+          const authModal = document.getElementById('auth-modal');
+          const logoModal = document.getElementById('logo-edit-modal');
+          if (!authModal.classList.contains('hidden')) {
+            closeAuthModal();
+          } else if (!playModal.classList.contains('hidden')) {
+            closePlayModal();
+          } else if (!uploadModal.classList.contains('hidden')) {
+            closeUploadModal();
+          } else if (logoModal && !logoModal.classList.contains('hidden')) {
+            closeLogoEditModal();
+          }
+        }
+        if (e.ctrlKey && e.key === 'u') {
+          e.preventDefault();
+          openUploadModal();
+        }
+      });
+
+      // ==========================================
+      //  移动端菜单
+      // ==========================================
+      document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+        document.getElementById('mobile-menu').classList.toggle('hidden');
+      });
+
+      // ==========================================
+      //  初始化
+      // ==========================================
+      updateAuthUI();
+      renderVideos();
+
+      // 从 URL 参数自动播放指定视频（从首页跳转过来）
+      const urlParams = new URLSearchParams(window.location.search);
+      const playId = urlParams.get('play');
+      if (playId) {
+        // 等一小段时间确保 DOM 和视频数据都加载完毕
+        setTimeout(() => {
+          const v = videos.find(v => v.id === playId);
+          if (v) {
+            playVideo(playId);
+          }
+        }, 300);
+      }
+
+      if (videos.length === 0) {
+        console.log('💡 提示：点击"上传视频"按钮或按 Ctrl+U 开始添加实战视频！');
+        console.log('💡 上传的视频文件存储在浏览器 IndexedDB 中，刷新页面不会丢失。');
+      }
+    </script>
+  </body>
+</html>
+
+

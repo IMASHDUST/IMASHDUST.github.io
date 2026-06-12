@@ -1,0 +1,1853 @@
+<!doctype html>
+<html lang="zh-CN" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>战队成员 | 鱿点猫饼</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"Noto Sans SC"', '"PingFang SC"', '"Microsoft YaHei"', 'sans-serif'],
+              display: ['"Orbitron"', '"Noto Sans SC"', 'sans-serif'],
+            },
+            colors: {
+              ow: {
+                orange: '#FA9C1B',
+                'orange-light': '#FBBF24',
+                blue: '#218FFE',
+                'blue-dark': '#0B3D91',
+                dark: '#0A0E17',
+                'dark-card': '#111827',
+                'dark-border': '#1F2937',
+                'dark-muted': '#9CA3AF',
+              }
+            },
+            animation: {
+              'float': 'float 6s ease-in-out infinite',
+              'glow': 'glow 2s ease-in-out infinite alternate',
+              'slide-up': 'slideUp 0.6s ease-out',
+              'fade-in': 'fadeIn 0.5s ease-out',
+            },
+            keyframes: {
+              float: { '0%, 100%': { transform: 'translateY(0px)' }, '50%': { transform: 'translateY(-10px)' } },
+              glow: { '0%': { boxShadow: '0 0 20px rgba(250, 156, 27, 0.2)' }, '100%': { boxShadow: '0 0 40px rgba(250, 156, 27, 0.4)' } },
+              slideUp: { '0%': { transform: 'translateY(30px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
+              fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+            },
+          },
+        },
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <style>
+      html { scroll-behavior: smooth; }
+      body { background-color: #0A0E17; }
+
+      .bg-grid {
+        background-image:
+          linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+        background-size: 60px 60px;
+      }
+      .text-gradient {
+        background: linear-gradient(135deg, #FA9C1B 0%, #FBBF24 50%, #FA9C1B 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .nav-glass {
+        background: rgba(17, 24, 39, 0.75);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+      }
+      .card-hover {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .card-hover:hover {
+        transform: translateY(-4px);
+        border-color: rgba(250, 156, 27, 0.3);
+        box-shadow: 0 20px 40px rgba(250, 156, 27, 0.08);
+      }
+      .divider-gradient {
+        height: 1px;
+        background: linear-gradient(90deg, transparent 0%, rgba(250,156,27,0.3) 50%, transparent 100%);
+      }
+      .nav-link { position: relative; }
+      .nav-link::after {
+        content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px;
+        background: linear-gradient(90deg, #FA9C1B, #FBBF24); transition: width 0.3s ease;
+      }
+      .nav-link:hover::after { width: 100%; }
+
+      /* 筛选标签 */
+      .filter-tab { transition: all 0.3s ease; cursor: pointer; }
+      .filter-tab.active {
+        background: linear-gradient(135deg, #FA9C1B, #FBBF24);
+        color: #0A0E17; border-color: transparent;
+      }
+
+      /* 进度条 */
+      .stat-bar { height: 4px; border-radius: 2px; transition: width 1s ease; }
+
+      /* 成员卡片 */
+      .member-card:hover .member-avatar { transform: scale(1.05); border-color: rgba(250, 156, 27, 0.5); }
+      .member-avatar { transition: all 0.4s ease; }
+
+      /* 详情面板 */
+      .detail-panel {
+        max-height: 0; overflow: hidden;
+        transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), padding 0.5s ease, opacity 0.3s ease;
+        opacity: 0;
+      }
+      .detail-panel.open { max-height: 600px; opacity: 1; }
+
+      /* 英雄图标 */
+      .hero-icon {
+        width: 44px; height: 44px; border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 22px; border: 2px solid rgba(255,255,255,0.08);
+        transition: all 0.3s ease;
+      }
+      .hero-icon:hover { border-color: rgba(250,156,27,0.4); transform: scale(1.1); }
+
+      /* 认证模态框 */
+      .auth-tab { transition: all 0.3s ease; cursor: pointer; }
+      .auth-modal-overlay { animation: fadeIn 0.3s ease-out; }
+      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+      /* 管理面板 */
+      .admin-panel { animation: slideUp 0.5s ease-out; }
+
+      /* 头像编辑悬浮层 */
+      .avatar-edit-overlay {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      .member-card:hover .avatar-edit-overlay {
+        opacity: 1;
+      }
+      .avatar-edit-overlay.hidden-edit {
+        display: none !important;
+      }
+
+      /* 裁剪模态框 */
+      .crop-modal-overlay {
+        animation: fadeIn 0.3s ease-out;
+      }
+      #crop-canvas {
+        cursor: grab;
+      }
+      #crop-canvas.dragging {
+        cursor: grabbing;
+      }
+
+      /* 缩放滑块 */
+      input[type="range"].crop-zoom-slider {
+        -webkit-appearance: none;
+        appearance: none;
+        height: 6px;
+        border-radius: 3px;
+        background: #1F2937;
+        outline: none;
+      }
+      input[type="range"].crop-zoom-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #FA9C1B, #FBBF24);
+        cursor: pointer;
+        border: 2px solid #0A0E17;
+        box-shadow: 0 0 8px rgba(250, 156, 27, 0.4);
+      }
+      input[type="range"].crop-zoom-slider::-moz-range-thumb {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #FA9C1B, #FBBF24);
+        cursor: pointer;
+        border: 2px solid #0A0E17;
+        box-shadow: 0 0 8px rgba(250, 156, 27, 0.4);
+      }
+    </style>
+  </head>
+  <body class="bg-ow-dark text-white font-sans antialiased">
+
+    <!-- ====== 导航栏 ====== -->
+    <nav class="fixed top-0 left-0 right-0 z-50 nav-glass border-b border-ow-dark-border">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center gap-2">
+            <a href="index.html" class="flex items-center gap-3 group">
+              <div id="nav-logo-container" class="w-10 h-10 rounded-lg bg-gradient-to-br from-ow-orange to-ow-orange-light flex items-center justify-center group-hover:animate-glow transition-all duration-300 overflow-hidden relative">
+                <svg id="nav-logo-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0A0E17" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+                </svg>
+                <img id="nav-logo-img" class="absolute inset-0 w-full h-full object-cover hidden" src="" alt="导航Logo" />
+              </div>
+              <span class="font-display font-bold text-lg tracking-wider">
+                <span class="text-white">鱿点</span><span class="text-ow-orange">猫饼</span>
+              </span>
+            </a>
+            <button id="nav-logo-edit-btn" class="hidden w-6 h-6 rounded border border-ow-orange/30 flex items-center justify-center hover:bg-ow-orange/10 transition-all cursor-pointer flex-shrink-0" onclick="openLogoEditModal()" title="编辑Logo">
+              <svg class="w-3 h-3 text-ow-orange/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+          </div>
+          <div class="hidden md:flex items-center gap-8">
+            <a href="index.html" class="nav-link text-sm font-medium text-white/80 hover:text-white transition-colors">首页</a>
+            <a href="index.html#about" class="nav-link text-sm font-medium text-white/80 hover:text-white transition-colors">关于我们</a>
+            <a href="members.html" class="nav-link text-sm font-medium text-ow-orange hover:text-ow-orange transition-colors">战队成员</a>
+            <a href="videos.html" class="nav-link text-sm font-medium text-white/80 hover:text-white transition-colors">实战视频</a>
+            <a href="join.html" class="nav-link text-sm font-medium text-white/80 hover:text-white transition-colors">加入我们</a>
+          </div>
+          <div class="flex items-center gap-4">
+            <!-- 未登录：登录按钮 -->
+            <button id="nav-login-btn" onclick="openAuthModal()" class="hidden md:inline-flex items-center gap-2 px-5 py-2 rounded-lg border border-ow-orange/50 text-ow-orange text-sm font-medium hover:bg-ow-orange/10 transition-all duration-300 cursor-pointer">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              登录
+            </button>
+            <!-- 已登录：用户信息 -->
+            <div id="nav-user-info" class="hidden md:flex items-center gap-3">
+              <span id="nav-role-badge" class="text-xs px-2 py-0.5 rounded-full font-medium border"></span>
+              <div class="w-8 h-8 rounded-full bg-ow-orange/20 border border-ow-orange/30 flex items-center justify-center">
+                <svg id="nav-avatar-icon" class="w-4 h-4 text-ow-orange" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
+              <span id="nav-username" class="text-sm font-medium text-white"></span>
+              <button onclick="doLogout()" class="text-xs text-ow-dark-muted hover:text-red-400 transition-colors cursor-pointer ml-1">退出</button>
+            </div>
+            <button id="mobile-menu-btn" class="md:hidden p-2 rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden pb-4 space-y-3">
+          <a href="index.html" class="block px-3 py-2 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/5 transition-colors">首页</a>
+          <a href="index.html#about" class="block px-3 py-2 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/5 transition-colors">关于我们</a>
+          <a href="members.html" class="block px-3 py-2 rounded-lg text-sm font-medium text-ow-orange hover:text-ow-orange hover:bg-white/5 transition-colors">战队成员</a>
+          <a href="videos.html" class="block px-3 py-2 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/5 transition-colors">实战视频</a>
+          <a href="join.html" class="block px-3 py-2 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-white/5 transition-colors">加入我们</a>
+          <button onclick="openAuthModal();document.getElementById('mobile-menu').classList.add('hidden');" class="block w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-ow-orange hover:bg-ow-orange/10 transition-colors cursor-pointer" id="mobile-login-btn">登录 / 注册</button>
+          <button onclick="doLogout();document.getElementById('mobile-menu').classList.add('hidden');" class="hidden w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer" id="mobile-logout-btn">退出登录</button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ====== 页面头部 ====== -->
+    <section class="relative pt-28 pb-16 overflow-hidden bg-grid">
+      <div class="absolute top-20 -right-32 w-80 h-80 bg-ow-orange/5 rounded-full blur-[100px]"></div>
+      <div class="absolute bottom-0 -left-32 w-80 h-80 bg-ow-blue/5 rounded-full blur-[100px]"></div>
+      <div class="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 text-center">
+        <span class="inline-block text-xs font-medium text-ow-orange tracking-widest uppercase mb-4 animate-slide-up">Team Roster</span>
+        <h1 class="text-5xl md:text-7xl font-display font-bold mb-4 animate-slide-up">
+          战队<span class="text-gradient">成员</span>
+        </h1>
+        <p class="max-w-xl mx-auto text-ow-dark-muted text-lg mb-4 animate-slide-up">
+          7位<s>精英</s>队员，四种定位，一支<s>所向披靡</s>快乐游戏的队伍
+        </p>
+        <!-- 数据总览 -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-6 max-w-3xl mx-auto mt-12 animate-slide-up">
+          <div class="rounded-xl bg-ow-dark-card/60 border border-ow-dark-border p-4">
+            <div class="text-2xl font-display font-bold text-ow-blue">1</div>
+            <div class="text-xs text-ow-dark-muted mt-1">TANK</div>
+          </div>
+          <div class="rounded-xl bg-ow-dark-card/60 border border-ow-dark-border p-4">
+            <div class="text-2xl font-display font-bold text-red-400">2</div>
+            <div class="text-xs text-ow-dark-muted mt-1">DPS</div>
+          </div>
+          <div class="rounded-xl bg-ow-dark-card/60 border border-ow-dark-border p-4">
+            <div class="text-2xl font-display font-bold text-green-400">2</div>
+            <div class="text-xs text-ow-dark-muted mt-1">SUPPORT</div>
+          </div>
+          <div class="rounded-xl bg-ow-dark-card/60 border border-ow-dark-border p-4">
+            <div class="text-2xl font-display font-bold text-purple-400">2</div>
+            <div class="text-xs text-ow-dark-muted mt-1">自由人</div>
+          </div>
+          <div class="rounded-xl bg-ow-dark-card/60 border border-ow-dark-border p-4">
+            <div class="text-2xl font-display font-bold text-gradient">7</div>
+            <div class="text-xs text-ow-dark-muted mt-1">总计</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 角色筛选 ====== -->
+    <section class="relative pb-8">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="divider-gradient mb-8"></div>
+        <div class="flex flex-wrap items-center justify-center gap-3">
+          <button class="filter-tab active px-6 py-2.5 rounded-lg border border-ow-dark-border text-sm font-medium text-white/80" data-role="all">全部成员</button>
+          <button class="filter-tab px-6 py-2.5 rounded-lg border border-ow-dark-border text-sm font-medium text-ow-blue" data-role="tank">
+            <span class="w-2 h-2 rounded-full bg-ow-blue inline-block mr-2"></span>TANK
+          </button>
+          <button class="filter-tab px-6 py-2.5 rounded-lg border border-ow-dark-border text-sm font-medium text-red-400" data-role="dps">
+            <span class="w-2 h-2 rounded-full bg-red-400 inline-block mr-2"></span>DPS
+          </button>
+          <button class="filter-tab px-6 py-2.5 rounded-lg border border-ow-dark-border text-sm font-medium text-green-400" data-role="support">
+            <span class="w-2 h-2 rounded-full bg-green-400 inline-block mr-2"></span>SUPPORT
+          </button>
+          <button class="filter-tab px-6 py-2.5 rounded-lg border border-ow-dark-border text-sm font-medium text-purple-400" data-role="flex">
+            <span class="w-2 h-2 rounded-full bg-purple-400 inline-block mr-2"></span>自由人
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 成员列表 ====== -->
+    <section class="relative pb-24">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div id="members-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+          <!-- ====== TANK: 星恒、、 ====== -->
+          <div class="member-card card-hover rounded-2xl bg-ow-dark-card border border-ow-dark-border overflow-hidden group" data-role="tank">
+            <div class="relative h-52 bg-gradient-to-br from-ow-blue/25 to-ow-blue-dark/40 flex items-center justify-center overflow-hidden">
+              <div class="absolute inset-0 bg-grid opacity-20"></div>
+              <div class="absolute top-4 left-4 px-3 py-1 rounded-full bg-ow-blue/20 border border-ow-blue/30 text-xs font-medium text-ow-blue">主坦</div>
+              <div class="absolute top-4 right-4 px-3 py-1 rounded-full bg-ow-dark/60 border border-ow-dark-border text-xs text-ow-dark-muted">白金</div>
+              <div class="member-avatar relative z-10 w-24 h-24 rounded-full border-2 border-ow-blue/40 flex items-center justify-center shadow-xl overflow-hidden bg-ow-dark-border cursor-pointer" data-member="星恒、、" onclick="openAvatarCrop('星恒、、')" title="点击更换头像">
+                <img src="img/avatar/xingheng.png" alt="星恒、、" class="w-full h-full object-cover" onerror="this.style.display='none';this.parentElement.querySelector('svg').style.display='';">
+                <svg class="w-14 h-14 text-ow-blue/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <div class="avatar-edit-overlay absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                </div>
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <span class="text-xs px-2 py-0.5 rounded bg-ow-blue/20 text-ow-blue font-medium">TANK</span>
+                  <h3 class="text-xl font-bold mt-1">星恒、、</h3>
+                  <p class="text-sm text-ow-dark-muted">主坦 · 团队护盾</p>
+                </div>
+                <div class="text-right">
+                  <div class="text-lg font-display font-bold text-ow-blue">3.4K</div>
+                  <div class="text-xs text-ow-dark-muted">SR Peak</div>
+                </div>
+              </div>
+              <button class="detail-toggle w-full text-center text-sm text-ow-orange hover:text-ow-orange-light transition-colors py-2 border-t border-ow-dark-border mt-2 flex items-center justify-center gap-1 cursor-pointer">
+                <span>查看详情</span>
+                <svg class="w-3 h-3 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="detail-panel pt-3">
+                <div class="space-y-3">
+                  <div>
+                    <div class="flex justify-between text-xs mb-1"><span class="text-ow-dark-muted">胜率</span><span class="text-white font-medium">50.8%</span></div>
+                    <div class="w-full h-1 bg-ow-dark-border rounded-full"><div class="stat-bar h-full bg-ow-blue rounded-full" style="width:50.8%"></div></div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between text-xs mb-1"><span class="text-ow-dark-muted">阻挡伤害/10min</span><span class="text-white font-medium">10K</span></div>
+                    <div class="w-full h-1 bg-ow-dark-border rounded-full"><div class="stat-bar h-full bg-ow-blue rounded-full" style="width:70%"></div></div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between text-xs mb-1"><span class="text-ow-dark-muted">场均伤害</span><span class="text-white font-medium">7k</span></div>
+                    <div class="w-full h-1 bg-ow-dark-border rounded-full"><div class="stat-bar h-full bg-ow-blue rounded-full" style="width:40%"></div></div>
+                  </div>
+                  <div class="pt-2 border-t border-ow-dark-border">
+                    <p class="text-xs text-ow-dark-muted mb-2">擅长英雄</p>
+                    <div class="flex gap-2">
+                      <div class="hero-icon bg-purple-900/30" title="西格玛"><img src="img/Σ.png"  style="width:40px ;"></div>
+                      <div class="hero-icon bg-blue-900/30" title="拉玛刹"><img src="img/ramatha.png"  style="width:40px ;"></div>
+                      <div class="hero-icon bg-green-700/30" title="奥丽莎"><img src="img/aoreza.png" style="width:40px ;"></div>
+                    </div>
+                  </div>
+                  <p class="text-xs text-ow-dark-muted leading-relaxed">
+                    "队伍的坚实的大盾，西格玛石头预判堪称一绝（是正面评价还是负面评价自己想去）。盾牌管理意识一流，能在关键时刻为队友撑起一片天。"
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ====== DPS: 尘烬 ====== -->
+          <div class="member-card card-hover rounded-2xl bg-ow-dark-card border border-ow-dark-border overflow-hidden group" data-role="dps">
+            <div class="relative h-52 bg-gradient-to-br from-red-500/25 to-red-800/40 flex items-center justify-center overflow-hidden">
+              <div class="absolute inset-0 bg-grid opacity-20"></div>
+              <div class="absolute top-4 left-4 px-3 py-1 rounded-full bg-red-500/20 border border-red-500/30 text-xs font-medium text-red-400">枪手</div>
+              <div class="absolute top-4 right-4 px-3 py-1 rounded-full bg-ow-dark/60 border border-ow-dark-border text-xs text-ow-dark-muted">钻石</div>
+              <div class="member-avatar relative z-10 w-24 h-24 rounded-full border-2 border-red-500/40 flex items-center justify-center shadow-xl overflow-hidden bg-ow-dark-border cursor-pointer" data-member="尘烬" onclick="openAvatarCrop('尘烬')" title="点击更换头像">
+                <img src="img/avatar/chenjin.png" alt="尘烬" class="w-full h-full object-cover" onerror="this.style.display='none';this.parentElement.querySelector('svg').style.display='';">
+                <svg class="w-14 h-14 text-red-400/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <div class="avatar-edit-overlay absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                </div>
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <span class="text-xs px-2 py-0.5 rounded bg-red-500/20 text-red-400 font-medium">DPS</span>
+                  <h3 class="text-xl font-bold mt-1">尘烬</h3>
+                  <p class="text-sm text-ow-dark-muted">精准射手</p>
+                </div>
+                <div class="text-right">
+                  <div class="text-lg font-display font-bold text-red-400">3.5K</div>
+                  <div class="text-xs text-ow-dark-muted">SR Peak</div>
+                </div>
+              </div>
+              <button class="detail-toggle w-full text-center text-sm text-ow-orange hover:text-ow-orange-light transition-colors py-2 border-t border-ow-dark-border mt-2 flex items-center justify-center gap-1 cursor-pointer">
+                <span>查看详情</span>
+                <svg class="w-3 h-3 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="detail-panel pt-3">
+                <div class="space-y-3">
+                  <div>
+                    <div class="flex justify-between text-xs mb-1"><span class="text-ow-dark-muted">胜率</span><span class="text-white font-medium">50%</span></div>
+                    <div class="w-full h-1 bg-ow-dark-border rounded-full"><div class="stat-bar h-full bg-red-400 rounded-full" style="width:50%"></div></div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between text-xs mb-1"><span class="text-ow-dark-muted">精准度</span><span class="text-white font-medium">51.7%</span></div>
+                    <div class="w-full h-1 bg-ow-dark-border rounded-full"><div class="stat-bar h-full bg-red-400 rounded-full" style="width:51.7%"></div></div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between text-xs mb-1"><span class="text-ow-dark-muted">场均击杀/10min</span><span class="text-white font-medium">19</span></div>
+                    <div class="w-full h-1 bg-ow-dark-border rounded-full"><div class="stat-bar h-full bg-red-400 rounded-full" style="width:65%"></div></div>
+                  </div>
+                  <div class="pt-2 border-t border-ow-dark-border">
+                    <p class="text-xs text-ow-dark-muted mb-2">擅长英雄</p>
+                    <div class="flex gap-2">
+                      <div class="hero-icon bg-red-900/30" title="麦克雷"><img src="img/mcc.png"  style="width:40px ;"></div>
+                      <div class="hero-icon bg-blue-900/30" title="士兵76"><img src="img/76.png"  style="width:40px ;"></div>
+                      <div class="hero-icon bg-yellow-700/30" title="艾什"><img src="img/ash.png"  style="width:40px ;"></div>
+                      <div class="hero-icon bg-blue-500/20" title="埃姆雷"><img src="img/amure.png"  style="width:40px ;"></div>
+                    </div>
+                  </div>
+                  <p class="text-xs text-ow-dark-muted leading-relaxed">
+                    "稳定输出的中距离枪手，麦克雷总能精准命中。沉着冷静型（其实最容易红温型）选手，团战站位稳健，关键时刻不掉链子（一掉链子就是关键链子）。"
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ====== DPS: 拉钩为什么上吊 ====== -->
+          <div class="member-card card-hover rounded-2xl bg-ow-dark-card border border-ow-dark-border overflow-hidden group" data-role="dps">
+            <div class="relative h-52 bg-gradient-to-br from-orange-600/25 to-red-800/40 flex items-center justify-center overflow-hidden">
+              <div class="absolute inset-0 bg-grid opacity-20"></div>
+              <div class="absolute top-4 left-4 px-3 py-1 rounded-full bg-orange-500/20 border border-orange-500/30 text-xs font-medium text-orange-400">刺客</div>
+              <div class="absolute top-4 right-4 px-3 py-1 rounded-full bg-ow-dark/60 border border-ow-dark-border text-xs text-ow-dark-muted">钻石</div>
+              <div class="member-avatar relative z-10 w-24 h-24 rounded-full border-2 border-orange-400/40 flex items-center justify-center shadow-xl overflow-hidden bg-ow-dark-border cursor-pointer" data-member="拉钩为什么上吊" onclick="openAvatarCrop('拉钩为什么上吊')" title="点击更换头像">
+                <img src="img/avatar/lagou.png" alt="拉钩为什么上吊" class="w-full h-full object-cover" onerror="this.style.display='none';this.parentElement.querySelector('svg').style.display='';">
+                <svg class="w-14 h-14 text-orange-400/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <div class="avatar-edit-overlay absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                </div>
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <span class="text-xs px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 font-medium">DPS</span>
+                  <h3 class="text-xl font-bold mt-1">拉钩为什么上吊</h3>
+                  <p class="text-sm text-ow-dark-muted">刺客 · 双修达人</p>
+                </div>
+                <div class="text-right">
+                  <div class="text-lg font-display font-bold text-orange-400">3.45K</div>
+                  <div class="text-xs text-ow-dark-muted">SR Peak</div>
+                </div>
+              </div>
+              <button class="detail-toggle w-full text-center text-sm text-ow-orange hover:text-ow-orange-light transition-colors py-2 border-t border-ow-dark-border mt-2 flex items-center justify-center gap-1 cursor-pointer">
+                <span>查看详情</span>
+                <svg class="w-3 h-3 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="detail-panel pt-3">
+                <div class="space-y-3">
+                  <div>
+                    <div class="flex justify-between text-xs mb-1"><span class="text-ow-dark-muted">胜率</span><span class="text-white font-medium">50%</span></div>
+                    <div class="w-full h-1 bg-ow-dark-border rounded-full"><div class="stat-bar h-full bg-orange-400 rounded-full" style="width:50%"></div></div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between text-xs mb-1"><span class="text-ow-dark-muted">K/D</span><span class="text-white font-medium">2.8</span></div>
+                    <div class="w-full h-1 bg-ow-dark-border rounded-full"><div class="stat-bar h-full bg-orange-400 rounded-full" style="width:55%"></div></div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between text-xs mb-1"><span class="text-ow-dark-muted">场均伤害/10min</span><span class="text-white font-medium">11K</span></div>
+                    <div class="w-full h-1 bg-ow-dark-border rounded-full"><div class="stat-bar h-full bg-orange-400 rounded-full" style="width:60%"></div></div>
+                  </div>
+                  <div class="pt-2 border-t border-ow-dark-border">
+                    <p class="text-xs text-ow-dark-muted mb-2">擅长英雄</p>
+                    <div class="flex gap-2">
+                      <div class="hero-icon bg-red-900/30" title="麦克雷"><img src="img/mcc.png"  style="width:40px ;"></div>
+                      <div class="hero-icon bg-green-700/30" title="源氏"><img src="img/genji.png"  style="width:40px ;"></div>
+
+                    </div>
+                  </div>
+                  <p class="text-xs text-ow-dark-muted leading-relaxed">
+                    "枪法与身法兼备的双修玩家，既能稳扎稳打又能激进（不要骗队友的保命技能啊喂）切入。名字取自动画梗，是团队欢乐担当。"
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ====== SUPPORT: 大熊吃小熊 ====== -->
+          <div class="member-card card-hover rounded-2xl bg-ow-dark-card border border-ow-dark-border overflow-hidden group" data-role="support">
+            <div class="relative h-52 bg-gradient-to-br from-green-500/25 to-green-800/40 flex items-center justify-center overflow-hidden">
+              <div class="absolute inset-0 bg-grid opacity-20"></div>
+              <div class="absolute top-4 left-4 px-3 py-1 rounded-full bg-green-500/20 border border-green-500/30 text-xs font-medium text-green-400">主辅助</div>
+              <div class="absolute top-4 right-4 px-3 py-1 rounded-full bg-ow-dark/60 border border-ow-dark-border text-xs text-ow-dark-muted">钻石</div>
+              <div class="member-avatar relative z-10 w-24 h-24 rounded-full border-2 border-green-500/40 flex items-center justify-center shadow-xl overflow-hidden bg-ow-dark-border cursor-pointer" data-member="大熊吃小熊" onclick="openAvatarCrop('大熊吃小熊')" title="点击更换头像">
+                <img src="img/avatar/daxiong.png" alt="大熊吃小熊" class="w-full h-full object-cover" onerror="this.style.display='none';this.parentElement.querySelector('svg').style.display='';">
+                <svg class="w-14 h-14 text-green-400/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <div class="avatar-edit-overlay absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                </div>
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <span class="text-xs px-2 py-0.5 rounded bg-green-500/20 text-green-400 font-medium">SUPPORT</span>
+                  <h3 class="text-xl font-bold mt-1">大熊吃小熊</h3>
+                  <p class="text-sm text-ow-dark-muted">主辅助 · 治疗核心</p>
+                </div>
+                <div class="text-right">
+                  <div class="text-lg font-display font-bold text-green-400">3.6K</div>
+                  <div class="text-xs text-ow-dark-muted">SR Peak</div>
+                </div>
+              </div>
+              <button class="detail-toggle w-full text-center text-sm text-ow-orange hover:text-ow-orange-light transition-colors py-2 border-t border-ow-dark-border mt-2 flex items-center justify-center gap-1 cursor-pointer">
+                <span>查看详情</span>
+                <svg class="w-3 h-3 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="detail-panel pt-3">
+                <div class="space-y-3">
+                  <div>
+                    <div class="flex justify-between text-xs mb-1"><span class="text-ow-dark-muted">胜率</span><span class="text-white font-medium">50.6%</span></div>
+                    <div class="w-full h-1 bg-ow-dark-border rounded-full"><div class="stat-bar h-full bg-green-400 rounded-full" style="width:50.6%"></div></div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between text-xs mb-1"><span class="text-ow-dark-muted">场均治疗/10min</span><span class="text-white font-medium">10.2K</span></div>
+                    <div class="w-full h-1 bg-ow-dark-border rounded-full"><div class="stat-bar h-full bg-green-400 rounded-full" style="width:78%"></div></div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between text-xs mb-1"><span class="text-ow-dark-muted">助攻/10min</span><span class="text-white font-medium">17</span></div>
+                    <div class="w-full h-1 bg-ow-dark-border rounded-full"><div class="stat-bar h-full bg-green-400 rounded-full" style="width:70%"></div></div>
+                  </div>
+                  <div class="pt-2 border-t border-ow-dark-border">
+                    <p class="text-xs text-ow-dark-muted mb-2">擅长英雄</p>
+                    <div class="flex gap-2">
+                      <div class="hero-icon bg-amber-700/30" title="安娜"><img src="img/ana.png"  style="width:40px ;"></div>
+                      <div class="hero-icon bg-teal-800/30" title="雾子"><img src="img/kiriko.png"  style="width:40px ;"></div>
+                      <div class="hero-icon bg-yellow-900/30" title="巴蒂斯特"><img src="img/bd.png"  style="width:40px ;"></div>
+                      <div class="hero-icon bg-blue-500/20" title="禅雅塔"><img src="img/zen.png"  style="width:40px ;"></div>
+                    </div>
+                  </div>
+                  <p class="text-xs text-ow-dark-muted leading-relaxed">
+                    "安娜绝活哥，纳米激素关键时刻总能给对人（不完全是）。治疗分配合理，全局意识强，是队伍的持续续航保障。"
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ====== SUPPORT: 超绝乌萨奇 ====== -->
+          <div class="member-card card-hover rounded-2xl bg-ow-dark-card border border-ow-dark-border overflow-hidden group" data-role="support">
+            <div class="relative h-52 bg-gradient-to-br from-emerald-500/25 to-green-700/35 flex items-center justify-center overflow-hidden">
+              <div class="absolute inset-0 bg-grid opacity-20"></div>
+              <div class="absolute top-4 left-4 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-xs font-medium text-emerald-400">副辅助</div>
+              <div class="absolute top-4 right-4 px-3 py-1 rounded-full bg-ow-dark/60 border border-ow-dark-border text-xs text-ow-dark-muted">白金</div>
+              <div class="member-avatar relative z-10 w-24 h-24 rounded-full border-2 border-emerald-400/40 flex items-center justify-center shadow-xl overflow-hidden bg-ow-dark-border cursor-pointer" data-member="超绝乌萨奇" onclick="openAvatarCrop('超绝乌萨奇')" title="点击更换头像">
+                <img src="img/avatar/wusaqi.png" alt="超绝乌萨奇" class="w-full h-full object-cover" onerror="this.style.display='none';this.parentElement.querySelector('svg').style.display='';">
+                <svg class="w-14 h-14 text-emerald-400/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <div class="avatar-edit-overlay absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                </div>
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <span class="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-medium">SUPPORT</span>
+                  <h3 class="text-xl font-bold mt-1">超绝乌萨奇</h3>
+                  <p class="text-sm text-ow-dark-muted">副辅助 · 无漾专精</p>
+                </div>
+                <div class="text-right">
+                  <div class="text-lg font-display font-bold text-emerald-400">3.3K</div>
+                  <div class="text-xs text-ow-dark-muted">SR Peak</div>
+                </div>
+              </div>
+              <button class="detail-toggle w-full text-center text-sm text-ow-orange hover:text-ow-orange-light transition-colors py-2 border-t border-ow-dark-border mt-2 flex items-center justify-center gap-1 cursor-pointer">
+                <span>查看详情</span>
+                <svg class="w-3 h-3 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="detail-panel pt-3">
+                <div class="space-y-3">
+                  <div>
+                    <div class="flex justify-between text-xs mb-1"><span class="text-ow-dark-muted">胜率</span><span class="text-white font-medium">41.8%</span></div>
+                    <div class="w-full h-1 bg-ow-dark-border rounded-full"><div class="stat-bar h-full bg-emerald-400 rounded-full" style="width:41.8%"></div></div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between text-xs mb-1"><span class="text-ow-dark-muted">场均治疗/10min</span><span class="text-white font-medium">10K</span></div>
+                    <div class="w-full h-1 bg-ow-dark-border rounded-full"><div class="stat-bar h-full bg-emerald-400 rounded-full" style="width:70%"></div></div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between text-xs mb-1"><span class="text-ow-dark-muted">场均击杀</span><span class="text-white font-medium">17/span></div>
+                    <div class="w-full h-1 bg-ow-dark-border rounded-full"><div class="stat-bar h-full bg-emerald-400 rounded-full" style="width:70%"></div></div>
+                  </div>
+                  <div class="pt-2 border-t border-ow-dark-border">
+                    <p class="text-xs text-ow-dark-muted mb-2">擅长英雄</p>
+                    <div class="flex gap-2">
+                      <div class="hero-icon bg-purple-800/30" title="无漾"><img src="img/wuyang.png"  style="width:40px ;"></div>
+                      <div class="hero-icon bg-indigo-800/30" title="雾子"><img src="img/kiriko.png"  style="width:40px ;"></div>
+                      <div class="hero-icon bg-cyan-800/30" title="朱诺"><img src="img/zhunuo.png"  style="width:40px ;"></div>
+                    
+                    </div>
+                  </div>
+                  <p class="text-xs text-ow-dark-muted leading-relaxed">
+                    "无漾专精，伤害与治疗双管齐下的输出型辅助。善于（真的假的）抓住敌方失误进行治疗+收割，团战存在感拉满（你是说雾子也会空符也算的话）。"
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ====== 自由人: 我的心好冷 ====== -->
+          <div class="member-card card-hover rounded-2xl bg-ow-dark-card border border-ow-dark-border overflow-hidden group" data-role="flex">
+            <div class="relative h-52 bg-gradient-to-br from-purple-500/25 to-indigo-800/40 flex items-center justify-center overflow-hidden">
+              <div class="absolute inset-0 bg-grid opacity-20"></div>
+              <div class="absolute top-4 left-4 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-500/30 text-xs font-medium text-purple-400">教练</div>
+              <div class="absolute top-4 right-4 px-3 py-1 rounded-full bg-ow-dark/60 border border-ow-dark-border text-xs text-ow-dark-muted">大师</div>
+              <div class="member-avatar relative z-10 w-24 h-24 rounded-full border-2 border-purple-400/40 flex items-center justify-center shadow-xl overflow-hidden bg-ow-dark-border cursor-pointer" data-member="我的心好冷" onclick="openAvatarCrop('我的心好冷')" title="点击更换头像">
+                <img src="img/avatar/xinhaoleng.png" alt="我的心好冷" class="w-full h-full object-cover" onerror="this.style.display='none';this.parentElement.querySelector('svg').style.display='';">
+                <svg class="w-14 h-14 text-purple-400/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <div class="avatar-edit-overlay absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                </div>
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <span class="text-xs px-2 py-0.5 rounded bg-purple-500/20 text-purple-400 font-medium">自由人</span>
+                  <h3 class="text-xl font-bold mt-1">我的心好冷</h3>
+                  <p class="text-sm text-ow-dark-muted">自由人/最严厉的教练/三项全能</p>
+                </div>
+                <div class="text-right">
+                  <div class="text-lg font-display font-bold text-purple-400">3.8K</div>
+                  <div class="text-xs text-ow-dark-muted">SR Peak</div>
+                </div>
+              </div>
+              <button class="detail-toggle w-full text-center text-sm text-ow-orange hover:text-ow-orange-light transition-colors py-2 border-t border-ow-dark-border mt-2 flex items-center justify-center gap-1 cursor-pointer">
+                <span>查看详情</span>
+                <svg class="w-3 h-3 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="detail-panel pt-3">
+                <div class="space-y-3">
+                  <div>
+                    <div class="flex justify-between text-xs mb-1"><span class="text-ow-dark-muted">胜率</span><span class="text-white font-medium">53.5%</span></div>
+                    <div class="w-full h-1 bg-ow-dark-border rounded-full"><div class="stat-bar h-full bg-purple-400 rounded-full" style="width:58%"></div></div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between text-xs mb-1"><span class="text-ow-dark-muted">精准度</span><span class="text-white font-medium">58%</span></div>
+                    <div class="w-full h-1 bg-ow-dark-border rounded-full"><div class="stat-bar h-full bg-purple-400 rounded-full" style="width:50%"></div></div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between text-xs mb-1"><span class="text-ow-dark-muted">场均伤害/10min</span><span class="text-white font-medium">12K</span></div>
+                    <div class="w-full h-1 bg-ow-dark-border rounded-full"><div class="stat-bar h-full bg-purple-400 rounded-full" style="width:80%"></div></div>
+                  </div>
+                  <div class="pt-2 border-t border-ow-dark-border">
+                    <p class="text-xs text-ow-dark-muted mb-2">擅长英雄</p>
+                    <div class="flex gap-2">
+                      <div class="hero-icon bg-blue-500/20" title="索杰恩"><img src="img/suo.png"  style="width:40px ;"></div>
+                      <div class="hero-icon bg-yellow-700/30" title="艾什"><img src="img/ash.png"  style="width:40px ;"></div>
+                      <div class="hero-icon bg-red-900/30" title="麦克雷"><img src="img/mcc.png"  style="width:40px ;"></div>
+                      <div class="hero-icon bg-purple-800/30" title="黑百合"><img src="img/widowmaker.png"  style="width:40px ;"></div>
+                    </div>
+                  </div>
+                  <p class="text-xs text-ow-dark-muted leading-relaxed">
+                    "队内段位最高，兼任教练一职。艾什索杰恩操作行云流水。最严厉的复盘批评家，也是最靠谱（有些时候也会翻车）的大腿。"
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ====== 自由人: 泽木桃惠 ====== -->
+          <div class="member-card card-hover rounded-2xl bg-ow-dark-card border border-ow-dark-border overflow-hidden group" data-role="flex">
+            <div class="relative h-52 bg-gradient-to-br from-violet-500/25 to-purple-700/35 flex items-center justify-center overflow-hidden">
+              <div class="absolute inset-0 bg-grid opacity-20"></div>
+              <div class="absolute top-4 left-4 px-3 py-1 rounded-full bg-violet-500/20 border border-violet-500/30 text-xs font-medium text-violet-400">多面手</div>
+              <div class="absolute top-4 right-4 px-3 py-1 rounded-full bg-ow-dark/60 border border-ow-dark-border text-xs text-ow-dark-muted">钻石</div>
+              <div class="member-avatar relative z-10 w-24 h-24 rounded-full border-2 border-violet-400/40 flex items-center justify-center shadow-xl overflow-hidden bg-ow-dark-border cursor-pointer" data-member="泽木桃惠" onclick="openAvatarCrop('泽木桃惠')" title="点击更换头像">
+                <img src="img/avatar/zemu.png" alt="泽木桃惠" class="w-full h-full object-cover" onerror="this.style.display='none';this.parentElement.querySelector('svg').style.display='';">
+                <svg class="w-14 h-14 text-violet-400/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <div class="avatar-edit-overlay absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                </div>
+              </div>
+            </div>
+            <div class="p-6">
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <span class="text-xs px-2 py-0.5 rounded bg-violet-500/20 text-violet-400 font-medium">自由人</span>
+                  <h3 class="text-xl font-bold mt-1">泽木桃惠</h3>
+                  <p class="text-sm text-ow-dark-muted">自由人 · TANK/DPS/SUPPORT三项全能</p>
+                </div>
+                <div class="text-right">
+                  <div class="text-lg font-display font-bold text-violet-400">3.5K</div>
+                  <div class="text-xs text-ow-dark-muted">SR Peak</div>
+                </div>
+              </div>
+              <button class="detail-toggle w-full text-center text-sm text-ow-orange hover:text-ow-orange-light transition-colors py-2 border-t border-ow-dark-border mt-2 flex items-center justify-center gap-1 cursor-pointer">
+                <span>查看详情</span>
+                <svg class="w-3 h-3 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+              <div class="detail-panel pt-3">
+                <div class="space-y-3">
+                  <div>
+                    <div class="flex justify-between text-xs mb-1"><span class="text-ow-dark-muted">胜率</span><span class="text-white font-medium">46.8%</span></div>
+                    <div class="w-full h-1 bg-ow-dark-border rounded-full"><div class="stat-bar h-full bg-violet-400 rounded-full" style="width:46.8%"></div></div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between text-xs mb-1"><span class="text-ow-dark-muted">K/D</span><span class="text-white font-medium">3.0</span></div>
+                    <div class="w-full h-1 bg-ow-dark-border rounded-full"><div class="stat-bar h-full bg-violet-400 rounded-full" style="width:60%"></div></div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between text-xs mb-1"><span class="text-ow-dark-muted">英雄池深度</span><span class="text-white font-medium">8+</span></div>
+                    <div class="w-full h-1 bg-ow-dark-border rounded-full"><div class="stat-bar h-full bg-violet-400 rounded-full" style="width:75%"></div></div>
+                  </div>
+                  <div class="pt-2 border-t border-ow-dark-border">
+                    <p class="text-xs text-ow-dark-muted mb-2">擅长英雄</p>
+                    <div class="flex gap-2">
+                      <div class="hero-icon bg-blue-900/30" title="温斯顿"><img src="img/wisdom.png"  style="width:40px ;"></div>
+                      <div class="hero-icon bg-blue-500/20" title="索杰恩"><img src="img/suo.png"  style="width:40px ;"></div>
+                      <div class="hero-icon bg-green-700/30" title="猎空"><img src="img/tracer.png"  style="width:40px ;"></div>
+                      <div class="hero-icon bg-pink-700/30" title="伊拉锐"><img src="img/irare.png"  style="width:40px ;"></div>
+                    </div>
+                  </div>
+                  <p class="text-xs text-ow-dark-muted leading-relaxed">
+                    "三位置都能玩的万金油选手。温斯顿跳入时机到位，索杰恩的电磁炮也颇有心得，伊拉锐的治疗和补伤更是及时雨。适应能力强，队伍缺啥补啥。（想不到怎么吐槽下次有槽点了再加进去）"
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 成员管理面板（仅管理员可见） ====== -->
+    <section id="admin-panel" class="relative pb-24 hidden">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8">
+        <div class="divider-gradient mb-12"></div>
+        <div class="admin-panel rounded-2xl bg-ow-dark-card border border-ow-dark-border p-6 md:p-8">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h2 class="text-2xl font-display font-bold">成员<span class="text-gradient">管理</span></h2>
+              <p class="text-sm text-ow-dark-muted mt-1">管理已注册的战队成员，赋予或撤销管理员权限</p>
+            </div>
+            <span class="text-xs px-3 py-1 rounded-full border border-ow-orange/50 text-ow-orange bg-ow-orange/10 font-medium">管理员面板</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-left text-ow-dark-muted border-b border-ow-dark-border">
+                  <th class="py-3 px-4 font-medium">用户名</th>
+                  <th class="py-3 px-4 font-medium">角色</th>
+                  <th class="py-3 px-4 font-medium">注册时间</th>
+                  <th class="py-3 px-4 font-medium text-right">操作</th>
+                </tr>
+              </thead>
+              <tbody id="admin-member-list"></tbody>
+            </table>
+          </div>
+          <div id="admin-empty" class="text-center py-8 text-ow-dark-muted hidden">暂无已注册的成员</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 登录/注册模态框 ====== -->
+    <div id="auth-modal" class="auth-modal-overlay hidden fixed inset-0 z-[150] flex items-center justify-center p-4" style="background: rgba(10,14,23,0.85); backdrop-filter: blur(10px);" onclick="closeAuthModal(event)">
+      <div class="bg-ow-dark-card border border-ow-dark-border rounded-2xl w-full max-w-md" onclick="event.stopPropagation()">
+        <div class="flex items-center border-b border-ow-dark-border">
+          <button id="auth-tab-login" class="auth-tab flex-1 py-3.5 text-sm font-semibold text-ow-orange border-b-2 border-ow-orange bg-ow-orange/5 rounded-tl-2xl transition-colors" onclick="switchAuthTab('login')">登录</button>
+          <button id="auth-tab-register" class="auth-tab flex-1 py-3.5 text-sm font-semibold text-ow-dark-muted border-b-2 border-transparent hover:text-white/80 transition-colors" onclick="switchAuthTab('register')">注册</button>
+          <button onclick="closeAuthModal()" class="p-3 hover:text-white text-ow-dark-muted transition-colors cursor-pointer">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div id="auth-form-login" class="p-6 space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-white/80 mb-1.5">用户名</label>
+            <input id="login-username" type="text" placeholder="输入用户名" class="w-full bg-[#0A0E17] border border-ow-dark-border rounded-lg px-4 py-2.5 text-sm text-white placeholder-ow-dark-muted focus:outline-none focus:border-ow-orange/50 transition-colors" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-white/80 mb-1.5">密码</label>
+            <input id="login-password" type="password" placeholder="输入密码" class="w-full bg-[#0A0E17] border border-ow-dark-border rounded-lg px-4 py-2.5 text-sm text-white placeholder-ow-dark-muted focus:outline-none focus:border-ow-orange/50 transition-colors" onkeydown="if(event.key==='Enter')handleLogin()" />
+          </div>
+          <div id="login-error" class="hidden text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-2.5"></div>
+          <button id="login-submit-btn" onclick="handleLogin()" class="w-full py-2.5 rounded-lg bg-gradient-to-r from-ow-orange to-ow-orange-light text-ow-dark text-sm font-semibold hover:shadow-lg hover:shadow-ow-orange/25 transition-all duration-300 cursor-pointer">登录</button>
+        </div>
+        <div id="auth-form-register" class="p-6 space-y-4 hidden">
+          <div>
+            <label class="block text-sm font-medium text-white/80 mb-1.5">用户名</label>
+            <input id="reg-username" type="text" placeholder="输入用户名（2-20个字符）" maxlength="20" class="w-full bg-[#0A0E17] border border-ow-dark-border rounded-lg px-4 py-2.5 text-sm text-white placeholder-ow-dark-muted focus:outline-none focus:border-ow-orange/50 transition-colors" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-white/80 mb-1.5">密码</label>
+            <input id="reg-password" type="password" placeholder="输入密码（至少4位）" class="w-full bg-[#0A0E17] border border-ow-dark-border rounded-lg px-4 py-2.5 text-sm text-white placeholder-ow-dark-muted focus:outline-none focus:border-ow-orange/50 transition-colors" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-white/80 mb-1.5">战队邀请码 <span class="text-red-400">*</span></label>
+            <input id="reg-invite" type="text" placeholder="请输入战队邀请码" class="w-full bg-[#0A0E17] border border-ow-dark-border rounded-lg px-4 py-2.5 text-sm text-white placeholder-ow-dark-muted focus:outline-none focus:border-ow-orange/50 transition-colors" onkeydown="if(event.key==='Enter')handleRegister()" />
+          </div>
+          <div id="reg-error" class="hidden text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-2.5"></div>
+          <button id="reg-submit-btn" onclick="handleRegister()" class="w-full py-2.5 rounded-lg bg-gradient-to-r from-ow-orange to-ow-orange-light text-ow-dark text-sm font-semibold hover:shadow-lg hover:shadow-ow-orange/25 transition-all duration-300 cursor-pointer">注册加入战队</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== 头像裁剪模态框 ====== -->
+    <div id="avatar-crop-modal" class="crop-modal-overlay hidden fixed inset-0 z-[160] flex items-center justify-center p-4" style="background: rgba(10,14,23,0.88); backdrop-filter: blur(12px);" onclick="closeAvatarCrop()">
+      <div class="bg-ow-dark-card border border-ow-dark-border rounded-2xl w-full max-w-md" onclick="event.stopPropagation()">
+        <div class="flex items-center justify-between p-5 border-b border-ow-dark-border">
+          <div>
+            <h3 class="text-lg font-bold">自定义头像</h3>
+            <p id="crop-member-name" class="text-xs text-ow-dark-muted mt-0.5">选择成员</p>
+          </div>
+          <button onclick="closeAvatarCrop()" class="p-1.5 rounded-lg hover:bg-white/10 text-ow-dark-muted hover:text-white transition-colors cursor-pointer">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <div class="p-5 space-y-5">
+          <!-- 选择图片 -->
+          <div class="flex items-center justify-between">
+            <button id="crop-file-btn" onclick="document.getElementById('crop-file-input').click()" class="px-4 py-2 rounded-lg border border-ow-dark-border text-sm text-white/80 hover:bg-white/5 hover:border-ow-orange/40 transition-all duration-300 cursor-pointer flex items-center gap-2">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              选择图片
+            </button>
+            <input id="crop-file-input" type="file" accept="image/*" class="hidden" onchange="loadCropImage(event)">
+            <span id="crop-filename" class="text-xs text-ow-dark-muted truncate max-w-[180px]">未选择文件</span>
+          </div>
+
+          <!-- 裁剪画布 -->
+          <div class="flex justify-center">
+            <div class="relative" style="width:300px;height:300px;">
+              <canvas id="crop-canvas" width="300" height="300" class="rounded-xl bg-ow-dark-border"
+                onmousedown="startCropDrag(event)"
+                onmousemove="onCropDrag(event)"
+                onmouseup="endCropDrag()"
+                onmouseleave="endCropDrag()"
+                onwheel="onCropWheel(event)"
+                ontouchstart="startCropDragTouch(event)"
+                ontouchmove="onCropDragTouch(event)"
+                ontouchend="endCropDrag()"
+                ontouchcancel="endCropDrag()">
+              </canvas>
+              <div class="absolute inset-0 rounded-xl pointer-events-none flex items-center justify-center">
+                <div class="text-xs text-ow-dark-muted" id="crop-placeholder">拖拽图片调整位置，滚轮缩放</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 缩放控制 -->
+          <div class="flex items-center gap-3">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-ow-dark-muted shrink-0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input id="crop-zoom" type="range" min="0.3" max="3" step="0.02" value="1" class="crop-zoom-slider flex-1" oninput="onCropZoom(this.value)">
+            <span id="crop-zoom-val" class="text-xs text-ow-dark-muted w-10 text-right">100%</span>
+          </div>
+
+          <!-- 圆形预览 -->
+          <div class="flex flex-col items-center gap-2">
+            <span class="text-xs text-ow-dark-muted">预览效果</span>
+            <div class="w-24 h-24 rounded-full overflow-hidden border-2 border-ow-orange/40 shadow-xl shadow-ow-orange/10">
+              <canvas id="crop-preview" width="192" height="192" class="w-full h-full"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- 底部按钮 -->
+        <div class="flex justify-end gap-3 p-5 border-t border-ow-dark-border">
+          <button onclick="resetAvatarCrop()" class="px-4 py-2 rounded-lg border border-ow-dark-border text-sm text-ow-dark-muted hover:text-white hover:border-white/30 transition-all duration-300 cursor-pointer">重置</button>
+          <button onclick="closeAvatarCrop()" class="px-4 py-2 rounded-lg border border-ow-dark-border text-sm text-ow-dark-muted hover:text-white transition-all duration-300 cursor-pointer">取消</button>
+          <button id="crop-confirm-btn" onclick="confirmAvatarCrop()" class="px-5 py-2 rounded-lg bg-gradient-to-r from-ow-orange to-ow-orange-light text-ow-dark text-sm font-semibold hover:shadow-lg hover:shadow-ow-orange/25 transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" disabled>确认裁剪</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== Logo 编辑模态框 ====== -->
+    <div id="logo-edit-modal" class="hidden fixed inset-0 z-[170] flex items-center justify-center p-4" style="background: rgba(10,14,23,0.85); backdrop-filter: blur(10px);" onclick="closeLogoEditModal(event)">
+      <div class="bg-ow-dark-card border border-ow-dark-border rounded-2xl w-full max-w-md max-h-[85vh] overflow-y-auto" onclick="event.stopPropagation()">
+        <div class="flex items-center justify-between p-5 border-b border-ow-dark-border">
+          <h3 class="text-lg font-bold text-white">自定义 Logo 和直播间</h3>
+          <button onclick="closeLogoEditModal()" class="p-1.5 rounded-lg hover:bg-white/10 text-ow-dark-muted hover:text-white transition-colors cursor-pointer">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="p-5 space-y-5">
+          <!-- 导航栏小图标 -->
+          <div>
+            <label class="block text-sm font-medium text-white/80 mb-2">导航栏小图标</label>
+            <div id="nav-logo-edit-preview" class="logo-preview-area aspect-square rounded-xl border border-ow-dark-border flex items-center justify-center overflow-hidden mb-3" style="max-width:120px;">
+              <div id="nav-logo-edit-placeholder" class="text-center">
+                <svg class="w-8 h-8 text-ow-dark-muted mx-auto mb-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <span class="text-xs text-ow-dark-muted">建议上传正方形图片</span>
+              </div>
+              <img id="nav-logo-edit-preview-img" class="w-full h-full object-cover hidden" src="" alt="导航栏图标预览" />
+            </div>
+            <div class="flex items-center gap-3">
+              <label class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-ow-dark-border text-sm text-white/70 hover:border-ow-orange/40 hover:text-ow-orange transition-all cursor-pointer">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                上传图标
+                <input type="file" id="nav-logo-edit-file" accept="image/*" class="hidden" onchange="handleNavLogoFileSelect(event)" />
+              </label>
+              <button id="nav-logo-edit-clear-btn" onclick="clearNavLogoPreview()" class="px-3 py-2 rounded-lg text-sm text-red-400 hover:bg-red-500/10 transition-colors hidden cursor-pointer">清除</button>
+            </div>
+          </div>
+          <!-- 直播间地址 -->
+          <div>
+            <label class="block text-sm font-medium text-white/80 mb-2">直播间地址（可选）</label>
+            <input id="logo-edit-url" type="url" placeholder="https://live.bilibili.com/xxxxx" class="w-full bg-[#0A0E17] border border-ow-dark-border rounded-lg px-4 py-2.5 text-sm text-white placeholder-ow-dark-muted focus:outline-none focus:border-ow-orange/50 transition-colors" />
+            <p class="text-xs text-ow-dark-muted mt-1.5">设置后将首页"关于我们"的 Logo 作为直播间入口</p>
+            <div id="logo-edit-error" class="hidden text-sm text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-2.5 mt-2"></div>
+          </div>
+        </div>
+        <div class="flex justify-between p-5 border-t border-ow-dark-border">
+          <button onclick="resetLogoConfig()" class="px-4 py-2 rounded-lg text-sm text-ow-dark-muted hover:text-red-400 transition-colors cursor-pointer">恢复默认</button>
+          <div class="flex gap-3">
+            <button onclick="closeLogoEditModal()" class="px-4 py-2 rounded-lg border border-ow-dark-border text-sm text-ow-dark-muted hover:text-white transition-colors cursor-pointer">取消</button>
+            <button onclick="saveLogoConfig()" class="px-5 py-2 rounded-lg bg-gradient-to-r from-ow-orange to-ow-orange-light text-ow-dark text-sm font-semibold hover:shadow-lg hover:shadow-ow-orange/25 transition-all duration-300 cursor-pointer">保存</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== 页脚 ====== -->
+    <footer class="relative border-t border-ow-dark-border">
+      <div class="max-w-7xl mx-auto px-6 lg:px-8 py-12">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+          <a href="index.html" class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-ow-orange to-ow-orange-light flex items-center justify-center">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0A0E17" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            </div>
+            <span class="font-display font-bold text-sm tracking-wider text-white/80">鱿点<span class="text-ow-orange">猫饼</span></span>
+          </a>
+          <p class="text-sm text-ow-dark-muted">&copy; 2025 Team.youdianmaobing. All rights reserved.</p>
+          <div class="flex items-center gap-6">
+            <a href="index.html" class="text-sm text-ow-dark-muted hover:text-white transition-colors">首页</a>
+            <a href="members.html" class="text-sm text-ow-orange">成员</a>
+            <a href="videos.html" class="text-sm text-ow-dark-muted hover:text-white transition-colors">视频</a>
+            <a href="join.html" class="text-sm text-ow-dark-muted hover:text-white transition-colors">加入我们</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- ====== JS ====== -->
+    <!-- Logo & 直播间配置 -->
+    <script>
+        const SITE_CONFIG_KEY = 'ydmb_site_config';
+
+        function getSiteConfig() {
+          try { return JSON.parse(localStorage.getItem(SITE_CONFIG_KEY) || '{}'); } catch(e) { return {}; }
+        }
+
+        function saveSiteConfig(config) {
+          localStorage.setItem(SITE_CONFIG_KEY, JSON.stringify(config));
+        }
+
+        function applySiteConfig() {
+          const config = getSiteConfig();
+          const navLogoImg = document.getElementById('nav-logo-img');
+          const navLogoSvg = document.getElementById('nav-logo-svg');
+          if (config.navLogoDataURL && navLogoImg) {
+            navLogoImg.src = config.navLogoDataURL;
+            navLogoImg.classList.remove('hidden');
+            if (navLogoSvg) navLogoSvg.classList.add('hidden');
+          } else {
+            if (navLogoImg) { navLogoImg.classList.add('hidden'); navLogoImg.src = ''; }
+            if (navLogoSvg) navLogoSvg.classList.remove('hidden');
+          }
+        }
+
+        let tempNavLogoDataURL = null;
+
+        function openLogoEditModal() {
+          const config = getSiteConfig();
+          const modal = document.getElementById('logo-edit-modal');
+          const urlInput = document.getElementById('logo-edit-url');
+          const errEl = document.getElementById('logo-edit-error');
+
+          tempNavLogoDataURL = config.navLogoDataURL || null;
+          const navPreviewImg = document.getElementById('nav-logo-edit-preview-img');
+          const navPlaceholder = document.getElementById('nav-logo-edit-placeholder');
+          const navClearBtn = document.getElementById('nav-logo-edit-clear-btn');
+
+          if (config.navLogoDataURL && navPreviewImg) {
+            navPreviewImg.src = config.navLogoDataURL;
+            navPreviewImg.classList.remove('hidden');
+            if (navPlaceholder) navPlaceholder.classList.add('hidden');
+            if (navClearBtn) navClearBtn.classList.remove('hidden');
+          } else {
+            if (navPreviewImg) { navPreviewImg.classList.add('hidden'); navPreviewImg.src = ''; }
+            if (navPlaceholder) navPlaceholder.classList.remove('hidden');
+            if (navClearBtn) navClearBtn.classList.add('hidden');
+          }
+
+          if (urlInput) urlInput.value = config.liveURL || '';
+          if (errEl) errEl.classList.add('hidden');
+
+          if (modal) {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+          }
+        }
+
+        function closeLogoEditModal(event) {
+          if (event && event.target !== event.currentTarget) return;
+          const modal = document.getElementById('logo-edit-modal');
+          if (modal) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+          }
+        }
+
+        function handleNavLogoFileSelect(event) {
+          const file = event.target.files[0];
+          if (!file) return;
+
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            tempNavLogoDataURL = e.target.result;
+
+            const previewImg = document.getElementById('nav-logo-edit-preview-img');
+            const placeholder = document.getElementById('nav-logo-edit-placeholder');
+            const clearBtn = document.getElementById('nav-logo-edit-clear-btn');
+
+            if (previewImg) {
+              previewImg.src = tempNavLogoDataURL;
+              previewImg.classList.remove('hidden');
+            }
+            if (placeholder) placeholder.classList.add('hidden');
+            if (clearBtn) clearBtn.classList.remove('hidden');
+          };
+          reader.readAsDataURL(file);
+        }
+
+        function clearNavLogoPreview() {
+          tempNavLogoDataURL = null;
+          const previewImg = document.getElementById('nav-logo-edit-preview-img');
+          const placeholder = document.getElementById('nav-logo-edit-placeholder');
+          const clearBtn = document.getElementById('nav-logo-edit-clear-btn');
+          const fileInput = document.getElementById('nav-logo-edit-file');
+
+          if (previewImg) { previewImg.classList.add('hidden'); previewImg.src = ''; }
+          if (placeholder) placeholder.classList.remove('hidden');
+          if (clearBtn) clearBtn.classList.add('hidden');
+          if (fileInput) fileInput.value = '';
+        }
+
+        function saveLogoConfig() {
+          const urlInput = document.getElementById('logo-edit-url');
+          const errEl = document.getElementById('logo-edit-error');
+          const liveURL = urlInput ? urlInput.value.trim() : '';
+
+          if (liveURL && !/^https?:\/\/.+/.test(liveURL)) {
+            if (errEl) { errEl.textContent = '请输入有效的直播间地址（以 http:// 或 https:// 开头）'; errEl.classList.remove('hidden'); }
+            return;
+          }
+
+          if (errEl) errEl.classList.add('hidden');
+
+          const config = getSiteConfig();
+          config.navLogoDataURL = tempNavLogoDataURL || null;
+          config.liveURL = liveURL || null;
+          saveSiteConfig(config);
+          applySiteConfig();
+          closeLogoEditModal();
+          showToast('配置已保存', 'success');
+        }
+
+        function resetLogoConfig() {
+          if (confirm('确定恢复默认图标和直播间设置？')) {
+            const config = getSiteConfig();
+            config.navLogoDataURL = null;
+            config.liveURL = null;
+            saveSiteConfig(config);
+            applySiteConfig();
+            closeLogoEditModal();
+            showToast('已恢复默认设置', 'info');
+          }
+        }
+
+        // 初始化
+        applySiteConfig();
+    </script>
+
+    <script>
+      // ==========================================
+      //  战队成员认证系统 (Auth System)
+      // ==========================================
+      const AUTH_KEY = 'ydmb_users';
+      const SESSION_KEY = 'ydmb_session';
+      const INVITE_CODE = 'owydmb';
+
+      async function hashPwd(pwd) {
+        const enc = new TextEncoder();
+        const data = enc.encode(pwd + 'ydmb_salt');
+        const hashBuf = await crypto.subtle.digest('SHA-256', data);
+        return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2,'0')).join('');
+      }
+
+      function getUsers() { try { return JSON.parse(localStorage.getItem(AUTH_KEY)||'[]'); } catch(e){ return []; } }
+      function saveUsers(u) { localStorage.setItem(AUTH_KEY, JSON.stringify(u)); }
+      function getSession() { try { return JSON.parse(localStorage.getItem(SESSION_KEY)||'null'); } catch(e){ return null; } }
+      function setSession(s) { if(s) localStorage.setItem(SESSION_KEY, JSON.stringify(s)); else localStorage.removeItem(SESSION_KEY); }
+
+      function isLoggedIn() { return !!getSession(); }
+      function isAdmin() { const s = getSession(); return s && s.role==='admin'; }
+      function getCurrUser() { return getSession(); }
+
+      // Toast 通知
+      function showToast(msg, type) {
+        let container = document.getElementById('toast-container');
+        if(!container) {
+          container = document.createElement('div');
+          container.id = 'toast-container';
+          container.className = 'fixed top-20 right-4 z-[200] space-y-2';
+          document.body.appendChild(container);
+        }
+        const colors = { success:'border-green-500/50 bg-green-500/10 text-green-400', error:'border-red-500/50 bg-red-500/10 text-red-400', info:'border-ow-orange/50 bg-ow-orange/10 text-ow-orange' };
+        const icons = { success:'✓', error:'✕', info:'ℹ' };
+        const t = document.createElement('div');
+        t.className = 'px-4 py-3 rounded-xl border text-sm flex items-center gap-2 ' + (colors[type]||colors.info);
+        t.innerHTML = `<span>${icons[type]||icons.info}</span><span>${msg}</span>`;
+        t.style.animation = 'slideUp 0.4s ease-out';
+        container.appendChild(t);
+        setTimeout(() => { t.style.opacity='0'; t.style.transform='translateY(-10px)'; t.style.transition='all 0.3s ease'; setTimeout(()=>t.remove(),300); }, 3000);
+      }
+
+      function doLogout() {
+        setSession(null);
+        updateAuthUI();
+        renderAdminPanel();
+        showToast('已退出登录', 'info');
+      }
+
+      function updateAuthUI() {
+        const session = getSession();
+        const loginBtn = document.getElementById('nav-login-btn');
+        const userInfo = document.getElementById('nav-user-info');
+        const roleBadge = document.getElementById('nav-role-badge');
+        const usernameEl = document.getElementById('nav-username');
+        const adminPanel = document.getElementById('admin-panel');
+        const mobileLoginBtn = document.getElementById('mobile-login-btn');
+        const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
+
+        // 头像编辑按钮
+        const editOverlays = document.querySelectorAll('.avatar-edit-overlay');
+
+        if(session) {
+          loginBtn.classList.add('!hidden');
+          userInfo.classList.remove('hidden', '!hidden');  // 同时移除 hidden 和 !hidden，让 md:flex 生效
+          roleBadge.textContent = session.role==='admin'?'管理员':'队员';
+          roleBadge.className = 'text-xs px-2 py-0.5 rounded-full font-medium border ' + (session.role==='admin'?'border-ow-orange/50 text-ow-orange bg-ow-orange/10':'border-ow-blue/50 text-ow-blue bg-ow-blue/10');
+          usernameEl.textContent = session.username;
+          mobileLoginBtn.classList.add('hidden');
+          mobileLogoutBtn.classList.remove('hidden');
+          // 显示头像编辑按钮
+          editOverlays.forEach(o => o.classList.remove('hidden-edit'));
+          // Logo 编辑按钮（管理员可见）
+          const navLogoEditBtn = document.getElementById('nav-logo-edit-btn');
+          if(navLogoEditBtn) { navLogoEditBtn.classList.toggle('hidden', session.role!=='admin'); }
+          if(session.role==='admin') {
+            adminPanel.classList.remove('hidden');
+            renderAdminPanel();
+          } else {
+            adminPanel.classList.add('hidden');
+          }
+        } else {
+          loginBtn.classList.remove('!hidden');             // 只移除 !hidden，保留 hidden 用于移动端
+          userInfo.classList.add('!hidden');                // 用 !hidden 强制隐藏，覆盖 md:flex
+          adminPanel.classList.add('hidden');
+          mobileLoginBtn.classList.remove('hidden');
+          mobileLogoutBtn.classList.add('hidden');
+          // 隐藏头像编辑按钮
+          editOverlays.forEach(o => o.classList.add('hidden-edit'));
+          // 隐藏 Logo 编辑按钮
+          const navLogoEditBtn = document.getElementById('nav-logo-edit-btn');
+          if(navLogoEditBtn) { navLogoEditBtn.classList.add('hidden'); }
+        }
+      }
+
+      // 认证模态框
+      function openAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); document.body.style.overflow='hidden'; switchAuthTab('login'); resetAuthForms(); }
+      function closeAuthModal(event) { if(event && event.target!==event.currentTarget) return; document.getElementById('auth-modal').classList.add('hidden'); document.body.style.overflow=''; }
+
+      function switchAuthTab(tab) {
+        const loginTab = document.getElementById('auth-tab-login');
+        const regTab = document.getElementById('auth-tab-register');
+        const loginForm = document.getElementById('auth-form-login');
+        const regForm = document.getElementById('auth-form-register');
+        resetAuthForms();
+        if(tab==='login') {
+          loginTab.className = 'auth-tab flex-1 py-3.5 text-sm font-semibold text-ow-orange border-b-2 border-ow-orange bg-ow-orange/5 rounded-tl-2xl transition-colors';
+          regTab.className = 'auth-tab flex-1 py-3.5 text-sm font-semibold text-ow-dark-muted border-b-2 border-transparent hover:text-white/80 transition-colors';
+          loginForm.classList.remove('hidden');
+          regForm.classList.add('hidden');
+        } else {
+          regTab.className = 'auth-tab flex-1 py-3.5 text-sm font-semibold text-ow-orange border-b-2 border-ow-orange bg-ow-orange/5 transition-colors';
+          loginTab.className = 'auth-tab flex-1 py-3.5 text-sm font-semibold text-ow-dark-muted border-b-2 border-transparent hover:text-white/80 transition-colors rounded-tl-2xl';
+          regForm.classList.remove('hidden');
+          loginForm.classList.add('hidden');
+        }
+      }
+
+      function resetAuthForms() {
+        document.getElementById('login-username').value='';
+        document.getElementById('login-password').value='';
+        document.getElementById('reg-username').value='';
+        document.getElementById('reg-password').value='';
+        document.getElementById('reg-invite').value='';
+        document.getElementById('login-error').classList.add('hidden');
+        document.getElementById('reg-error').classList.add('hidden');
+      }
+
+      async function handleLogin() {
+        const username = document.getElementById('login-username').value.trim();
+        const password = document.getElementById('login-password').value;
+        const errEl = document.getElementById('login-error');
+        const btn = document.getElementById('login-submit-btn');
+        if(!username||!password){ errEl.classList.remove('hidden'); errEl.textContent='请填写用户名和密码'; return; }
+        btn.disabled=true; btn.textContent='登录中...';
+        const users = getUsers();
+        const user = users.find(u=>u.username===username);
+        if(!user){ errEl.classList.remove('hidden'); errEl.textContent='用户名不存在'; btn.disabled=false; btn.textContent='登录'; return; }
+        const hash = await hashPwd(password);
+        if(hash!==user.passwordHash){ errEl.classList.remove('hidden'); errEl.textContent='密码错误'; btn.disabled=false; btn.textContent='登录'; return; }
+        setSession({id:user.id, username:user.username, role:user.role});
+        errEl.classList.add('hidden');
+        closeAuthModal();
+        updateAuthUI();
+        showToast('登录成功！欢迎回来，'+user.username,'success');
+        btn.disabled=false; btn.textContent='登录';
+      }
+
+      async function handleRegister() {
+        const username = document.getElementById('reg-username').value.trim();
+        const password = document.getElementById('reg-password').value;
+        const invite = document.getElementById('reg-invite').value.trim();
+        const errEl = document.getElementById('reg-error');
+        const btn = document.getElementById('reg-submit-btn');
+        if(!username||!password){ errEl.classList.remove('hidden'); errEl.textContent='请填写用户名和密码'; return; }
+        if(username.length<2||username.length>20){ errEl.classList.remove('hidden'); errEl.textContent='用户名2-20个字符'; return; }
+        if(password.length<4){ errEl.classList.remove('hidden'); errEl.textContent='密码至少4位'; return; }
+        if(invite!==INVITE_CODE){ errEl.classList.remove('hidden'); errEl.textContent='邀请码错误'; return; }
+        btn.disabled=true; btn.textContent='注册中...';
+        const users = getUsers();
+        if(users.find(u=>u.username===username)){ errEl.classList.remove('hidden'); errEl.textContent='用户名已存在'; btn.disabled=false; btn.textContent='注册加入战队'; return; }
+        const hash = await hashPwd(password);
+        const isFirst = users.length===0;
+        const newUser = { id:'u_'+Date.now().toString(36)+'_'+Math.random().toString(36).substr(2,6), username, passwordHash:hash, role:isFirst?'admin':'member', createdAt:new Date().toISOString() };
+        users.push(newUser); saveUsers(users);
+        setSession({id:newUser.id, username:newUser.username, role:newUser.role});
+        errEl.classList.add('hidden');
+        closeAuthModal();
+        updateAuthUI();
+        showToast('注册成功！欢迎加入战队'+(isFirst?'（你已成为管理员）':''),'success');
+        btn.disabled=false; btn.textContent='注册加入战队';
+      }
+
+      // ==========================================
+      //  管理员功能 - 成员管理
+      // ==========================================
+      function renderAdminPanel() {
+        const tbody = document.getElementById('admin-member-list');
+        const empty = document.getElementById('admin-empty');
+        const session = getSession();
+
+        if(!session || session.role!=='admin') { return; }
+
+        const users = getUsers();
+        if(users.length===0) {
+          empty.classList.remove('hidden');
+          tbody.innerHTML = '';
+          return;
+        }
+
+        empty.classList.add('hidden');
+        tbody.innerHTML = users.map((u,i) => {
+          const isSelf = u.id === session.id;
+          const roleBadge = u.role==='admin'
+            ? '<span class="text-xs px-2 py-0.5 rounded-full border border-ow-orange/50 text-ow-orange bg-ow-orange/10 font-medium">管理员</span>'
+            : '<span class="text-xs px-2 py-0.5 rounded-full border border-ow-blue/50 text-ow-blue bg-ow-blue/10 font-medium">队员</span>';
+          const dateStr = new Date(u.createdAt).toLocaleDateString('zh-CN', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+
+          let actionBtn = '';
+          if(!isSelf) {
+            if(u.role==='member') {
+              actionBtn = `<button onclick="promoteMember('${u.id}')" class="px-3 py-1.5 rounded-lg bg-ow-orange/15 border border-ow-orange/30 text-ow-orange text-xs hover:bg-ow-orange/25 transition-colors cursor-pointer">提升为管理员</button>`;
+            } else {
+              actionBtn = `<button onclick="demoteAdmin('${u.id}')" class="px-3 py-1.5 rounded-lg bg-red-500/15 border border-red-500/30 text-red-400 text-xs hover:bg-red-500/25 transition-colors cursor-pointer">撤销管理员</button>`;
+            }
+          } else {
+            actionBtn = '<span class="text-xs text-ow-dark-muted">当前用户</span>';
+          }
+
+          return `<tr class="border-b border-ow-dark-border/50 hover:bg-white/[0.02] transition-colors">
+            <td class="py-3 px-4 font-medium text-white">${u.username}</td>
+            <td class="py-3 px-4">${roleBadge}</td>
+            <td class="py-3 px-4 text-ow-dark-muted">${dateStr}</td>
+            <td class="py-3 px-4 text-right">${actionBtn}</td>
+          </tr>`;
+        }).join('');
+      }
+
+      function promoteMember(userId) {
+        const users = getUsers();
+        const idx = users.findIndex(u=>u.id===userId);
+        if(idx===-1) return;
+        if(users[idx].role==='admin'){ showToast('该成员已是管理员','info'); return; }
+        users[idx].role = 'admin';
+        saveUsers(users);
+        renderAdminPanel();
+        showToast(users[idx].username + ' 已被提升为管理员','success');
+      }
+
+      function demoteAdmin(userId) {
+        const session = getSession();
+        if(userId===session.id){ showToast('不能撤销自己的管理员权限','error'); return; }
+        const users = getUsers();
+        const idx = users.findIndex(u=>u.id===userId);
+        if(idx===-1) return;
+        if(users[idx].role!=='admin'){ showToast('该成员不是管理员','info'); return; }
+        users[idx].role = 'member';
+        saveUsers(users);
+        renderAdminPanel();
+        showToast(users[idx].username + ' 已被撤销管理员权限','info');
+      }
+
+      // ==========================================
+      //  移动端菜单
+      // ==========================================
+      const menuBtn = document.getElementById('mobile-menu-btn');
+      const mobileMenu = document.getElementById('mobile-menu');
+      menuBtn.addEventListener('click', () => { mobileMenu.classList.toggle('hidden'); });
+      mobileMenu.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => { mobileMenu.classList.add('hidden'); });
+      });
+
+      // ==========================================
+      //  筛选功能
+      // ==========================================
+      const filterTabs = document.querySelectorAll('.filter-tab');
+      const memberCards = document.querySelectorAll('#members-grid > [data-role]');
+
+      filterTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          filterTabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          const role = tab.getAttribute('data-role');
+
+          memberCards.forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'scale(0.95)';
+            card.style.transition = 'all 0.3s ease';
+
+            setTimeout(() => {
+              if (role === 'all' || card.getAttribute('data-role') === role) {
+                card.style.display = '';
+                setTimeout(() => {
+                  card.style.opacity = '1';
+                  card.style.transform = 'scale(1)';
+                }, 50);
+              } else {
+                card.style.display = 'none';
+              }
+            }, 200);
+          });
+        });
+      });
+
+      // ==========================================
+      //  详情展开/收起
+      // ==========================================
+      document.querySelectorAll('.detail-toggle').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const panel = this.nextElementSibling;
+          const arrow = this.querySelector('svg');
+          const isOpen = panel.classList.contains('open');
+
+          panel.classList.toggle('open');
+          if (!isOpen) {
+            arrow.style.transform = 'rotate(180deg)';
+            panel.style.paddingTop = '12px';
+            panel.style.paddingBottom = '4px';
+          } else {
+            arrow.style.transform = 'rotate(0deg)';
+            panel.style.paddingTop = '0';
+            panel.style.paddingBottom = '0';
+          }
+        });
+      });
+
+
+      // ==========================================
+      //  头像裁剪系统 (Avatar Crop System)
+      // ==========================================
+      const AVATAR_KEY = 'ydmb_avatars';
+      const CROP_SIZE = 300;       // 裁剪画布尺寸
+      const CIRCLE_CX = 150;       // 圆心 X
+      const CIRCLE_CY = 150;       // 圆心 Y
+      const CIRCLE_R = 120;        // 裁剪圆半径
+      const PREVIEW_SIZE = 192;    // 预览/输出尺寸（2x retina）
+
+      let cropMemberName = '';
+      let cropImage = null;
+      let cropImgX = 0;
+      let cropImgY = 0;
+      let cropScale = 1;
+      let cropDragging = false;
+      let cropDragStartX = 0;
+      let cropDragStartY = 0;
+      let cropImgStartX = 0;
+      let cropImgStartY = 0;
+
+      // ======== localStorage 持久化 ========
+
+      function getSavedAvatars() {
+        try { return JSON.parse(localStorage.getItem(AVATAR_KEY) || '{}'); } catch(e) { return {}; }
+      }
+
+      function saveAvatarData(memberName, dataURL) {
+        const avatars = getSavedAvatars();
+        avatars[memberName] = dataURL;
+        localStorage.setItem(AVATAR_KEY, JSON.stringify(avatars));
+      }
+
+      function getSavedAvatar(memberName) {
+        const avatars = getSavedAvatars();
+        return avatars[memberName] || null;
+      }
+
+      function removeSavedAvatar(memberName) {
+        const avatars = getSavedAvatars();
+        delete avatars[memberName];
+        localStorage.setItem(AVATAR_KEY, JSON.stringify(avatars));
+      }
+
+      // ======== 页面加载时恢复头像 ========
+
+      function loadAllSavedAvatars() {
+        const avatars = getSavedAvatars();
+        const avatarDivs = document.querySelectorAll('.member-avatar[data-member]');
+        avatarDivs.forEach(div => {
+          const name = div.getAttribute('data-member');
+          const dataURL = avatars[name];
+          if (dataURL) {
+            const img = div.querySelector('img');
+            if (img) {
+              img.src = dataURL;
+              img.onerror = null;
+              img.style.display = '';
+              const svg = div.querySelector('svg');
+              if (svg) svg.style.display = 'none';
+            }
+          }
+        });
+      }
+
+      // ======== 打开/关闭裁剪模态框 ========
+
+      function openAvatarCrop(memberName) {
+        cropMemberName = memberName;
+        document.getElementById('crop-member-name').textContent = '为「' + memberName + '」更换头像';
+        document.getElementById('avatar-crop-modal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+
+        // 尝试加载已有头像
+        const existingData = getSavedAvatar(memberName);
+        const avatarDiv = document.querySelector('.member-avatar[data-member="' + CSS.escape(memberName) + '"]');
+        let srcToLoad = null;
+
+        if (existingData) {
+          srcToLoad = existingData;
+        } else if (avatarDiv) {
+          const img = avatarDiv.querySelector('img');
+          if (img && img.src && !img.src.startsWith('data:')) {
+            srcToLoad = img.src;
+          }
+        }
+
+        if (srcToLoad) {
+          loadImageFromURL(srcToLoad);
+        } else {
+          resetCropState();
+          document.getElementById('crop-confirm-btn').disabled = true;
+        }
+
+        document.getElementById('crop-file-input').value = '';
+        document.getElementById('crop-filename').textContent = '未选择文件';
+      }
+
+      function closeAvatarCrop() {
+        document.getElementById('avatar-crop-modal').classList.add('hidden');
+        document.body.style.overflow = '';
+        cropImage = null;
+        cropMemberName = '';
+      }
+
+      // ======== 加载图片 ========
+
+      function loadImageFromURL(url) {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = function() {
+          cropImage = img;
+          resetCropPosition();
+          renderAll();
+          document.getElementById('crop-confirm-btn').disabled = false;
+        };
+        img.onerror = function() {
+          resetCropState();
+          document.getElementById('crop-confirm-btn').disabled = true;
+          showToast('图片加载失败', 'error');
+        };
+        img.src = url;
+      }
+
+      function loadCropImage(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        document.getElementById('crop-filename').textContent = file.name;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          loadImageFromURL(e.target.result);
+        };
+        reader.readAsDataURL(file);
+      }
+
+      // ======== 重置位置/状态 ========
+
+      function resetCropState() {
+        cropImage = null;
+        cropImgX = 0;
+        cropImgY = 0;
+        cropScale = 1;
+        document.getElementById('crop-zoom').value = 1;
+        document.getElementById('crop-zoom-val').textContent = '100%';
+        const canvas = document.getElementById('crop-canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, CROP_SIZE, CROP_SIZE);
+        const preview = document.getElementById('crop-preview');
+        const pctx = preview.getContext('2d');
+        pctx.clearRect(0, 0, PREVIEW_SIZE, PREVIEW_SIZE);
+        document.getElementById('crop-placeholder').style.display = '';
+      }
+
+      function resetCropPosition() {
+        if (!cropImage) return;
+        // 计算让图片填满裁剪圆（cover 模式）
+        const imgW = cropImage.naturalWidth;
+        const imgH = cropImage.naturalHeight;
+        const diameter = CIRCLE_R * 2;
+        cropScale = Math.max(diameter / imgW, diameter / imgH);
+        const scaledW = imgW * cropScale;
+        const scaledH = imgH * cropScale;
+        cropImgX = CIRCLE_CX - scaledW / 2;
+        cropImgY = CIRCLE_CY - scaledH / 2;
+        document.getElementById('crop-zoom').value = cropScale;
+        document.getElementById('crop-zoom-val').textContent = Math.round(cropScale * 100) + '%';
+        document.getElementById('crop-placeholder').style.display = 'none';
+      }
+
+      function resetAvatarCrop() {
+        if (cropImage) {
+          resetCropPosition();
+          renderAll();
+        }
+      }
+
+      // ======== 渲染 ========
+
+      function renderCropCanvas() {
+        const canvas = document.getElementById('crop-canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, CROP_SIZE, CROP_SIZE);
+
+        if (!cropImage) return;
+
+        const scaledW = cropImage.naturalWidth * cropScale;
+        const scaledH = cropImage.naturalHeight * cropScale;
+
+        // 1. 在圆形区域内绘制图片
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(CIRCLE_CX, CIRCLE_CY, CIRCLE_R, 0, Math.PI * 2);
+        ctx.clip();
+        ctx.drawImage(cropImage, cropImgX, cropImgY, scaledW, scaledH);
+        ctx.restore();
+
+        // 2. 绘制圆形外的暗色遮罩
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(0, 0, CROP_SIZE, CROP_SIZE);
+        ctx.arc(CIRCLE_CX, CIRCLE_CY, CIRCLE_R, 0, Math.PI * 2, true); // 反向绘制用于切割
+        ctx.fillStyle = 'rgba(10, 14, 23, 0.7)';
+        ctx.fill();
+        ctx.restore();
+
+        // 3. 绘制圆形边框（虚线+实线双层）
+        ctx.beginPath();
+        ctx.arc(CIRCLE_CX, CIRCLE_CY, CIRCLE_R, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(250, 156, 27, 0.5)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([6, 4]);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(CIRCLE_CX, CIRCLE_CY, CIRCLE_R, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(250, 156, 27, 0.7)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([]);
+        ctx.stroke();
+
+        // 4. 十字准星辅助线
+        ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+        ctx.lineWidth = 0.5;
+        ctx.setLineDash([4, 8]);
+        ctx.beginPath();
+        ctx.moveTo(0, CIRCLE_CY);
+        ctx.lineTo(CROP_SIZE, CIRCLE_CY);
+        ctx.moveTo(CIRCLE_CX, 0);
+        ctx.lineTo(CIRCLE_CX, CROP_SIZE);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      function renderCropPreview() {
+        const preview = document.getElementById('crop-preview');
+        const pctx = preview.getContext('2d');
+        pctx.clearRect(0, 0, PREVIEW_SIZE, PREVIEW_SIZE);
+
+        if (!cropImage) return;
+
+        const scaledW = cropImage.naturalWidth * cropScale;
+        const scaledH = cropImage.naturalHeight * cropScale;
+
+        // 计算映射比例：预览画布 vs 裁剪画布
+        const ratio = PREVIEW_SIZE / CROP_SIZE;
+
+        // 圆形裁剪
+        pctx.save();
+        pctx.beginPath();
+        pctx.arc(PREVIEW_SIZE / 2, PREVIEW_SIZE / 2, PREVIEW_SIZE / 2, 0, Math.PI * 2);
+        pctx.clip();
+        pctx.drawImage(
+          cropImage,
+          cropImgX * ratio,
+          cropImgY * ratio,
+          scaledW * ratio,
+          scaledH * ratio
+        );
+        pctx.restore();
+      }
+
+      function renderAll() {
+        renderCropCanvas();
+        renderCropPreview();
+      }
+
+      // ======== 拖拽交互 ========
+
+      function getCanvasPos(e) {
+        const canvas = document.getElementById('crop-canvas');
+        const rect = canvas.getBoundingClientRect();
+        return {
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top
+        };
+      }
+
+      function startCropDrag(e) {
+        if (!cropImage) return;
+        e.preventDefault();
+        cropDragging = true;
+        const pos = getCanvasPos(e);
+        cropDragStartX = pos.x;
+        cropDragStartY = pos.y;
+        cropImgStartX = cropImgX;
+        cropImgStartY = cropImgY;
+        document.getElementById('crop-canvas').classList.add('dragging');
+      }
+
+      function onCropDrag(e) {
+        if (!cropDragging) return;
+        e.preventDefault();
+        const pos = getCanvasPos(e);
+        cropImgX = cropImgStartX + (pos.x - cropDragStartX);
+        cropImgY = cropImgStartY + (pos.y - cropDragStartY);
+        renderAll();
+      }
+
+      function endCropDrag() {
+        if (!cropDragging) return;
+        cropDragging = false;
+        document.getElementById('crop-canvas').classList.remove('dragging');
+      }
+
+      // ======== 触摸设备支持 ========
+
+      function getCanvasTouchPos(e) {
+        const canvas = document.getElementById('crop-canvas');
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        return {
+          x: touch.clientX - rect.left,
+          y: touch.clientY - rect.top
+        };
+      }
+
+      function startCropDragTouch(e) {
+        if (!cropImage) return;
+        if (e.touches.length === 2) {
+          // 双指缩放暂不处理，使用滑块缩放
+          return;
+        }
+        e.preventDefault();
+        cropDragging = true;
+        const pos = getCanvasTouchPos(e);
+        cropDragStartX = pos.x;
+        cropDragStartY = pos.y;
+        cropImgStartX = cropImgX;
+        cropImgStartY = cropImgY;
+        document.getElementById('crop-canvas').classList.add('dragging');
+      }
+
+      function onCropDragTouch(e) {
+        if (!cropDragging) return;
+        e.preventDefault();
+        const pos = getCanvasTouchPos(e);
+        cropImgX = cropImgStartX + (pos.x - cropDragStartX);
+        cropImgY = cropImgStartY + (pos.y - cropDragStartY);
+        renderAll();
+      }
+
+      // ======== 缩放交互 ========
+
+      function onCropWheel(e) {
+        if (!cropImage) return;
+        e.preventDefault();
+
+        const delta = e.deltaY > 0 ? -0.05 : 0.05;
+        const newScale = Math.max(0.3, Math.min(3, cropScale + delta));
+
+        // 以圆心为锚点缩放
+        const anchorX = CIRCLE_CX;
+        const anchorY = CIRCLE_CY;
+        cropImgX = anchorX - (anchorX - cropImgX) * (newScale / cropScale);
+        cropImgY = anchorY - (anchorY - cropImgY) * (newScale / cropScale);
+        cropScale = newScale;
+
+        document.getElementById('crop-zoom').value = cropScale;
+        document.getElementById('crop-zoom-val').textContent = Math.round(cropScale * 100) + '%';
+        renderAll();
+      }
+
+      function onCropZoom(value) {
+        if (!cropImage) return;
+        const newScale = parseFloat(value);
+
+        const anchorX = CIRCLE_CX;
+        const anchorY = CIRCLE_CY;
+        cropImgX = anchorX - (anchorX - cropImgX) * (newScale / cropScale);
+        cropImgY = anchorY - (anchorY - cropImgY) * (newScale / cropScale);
+        cropScale = newScale;
+
+        document.getElementById('crop-zoom-val').textContent = Math.round(cropScale * 100) + '%';
+        renderAll();
+      }
+
+      // ======== 确认裁剪 & 保存 ========
+
+      function confirmAvatarCrop() {
+        if (!cropImage || !cropMemberName) return;
+
+        // 在临时画布上渲染最终圆形头像
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = PREVIEW_SIZE;
+        tempCanvas.height = PREVIEW_SIZE;
+        const tctx = tempCanvas.getContext('2d');
+
+        // 绘制圆形背景（可选，避免透明边）
+        tctx.beginPath();
+        tctx.arc(PREVIEW_SIZE / 2, PREVIEW_SIZE / 2, PREVIEW_SIZE / 2, 0, Math.PI * 2);
+        tctx.fillStyle = '#0A0E17';
+        tctx.fill();
+
+        // 圆形裁剪绘制图片
+        const scaledW = cropImage.naturalWidth * cropScale;
+        const scaledH = cropImage.naturalHeight * cropScale;
+        const ratio = PREVIEW_SIZE / CROP_SIZE;
+
+        tctx.save();
+        tctx.beginPath();
+        tctx.arc(PREVIEW_SIZE / 2, PREVIEW_SIZE / 2, PREVIEW_SIZE / 2, 0, Math.PI * 2);
+        tctx.clip();
+        tctx.drawImage(
+          cropImage,
+          cropImgX * ratio,
+          cropImgY * ratio,
+          scaledW * ratio,
+          scaledH * ratio
+        );
+        tctx.restore();
+
+        const dataURL = tempCanvas.toDataURL('image/png');
+
+        // 保存到 localStorage
+        saveAvatarData(cropMemberName, dataURL);
+
+        // 更新页面上的头像
+        const avatarDiv = document.querySelector('.member-avatar[data-member="' + CSS.escape(cropMemberName) + '"]');
+        if (avatarDiv) {
+          const img = avatarDiv.querySelector('img');
+          if (img) {
+            img.src = dataURL;
+            img.onerror = null; // 移除 onerror 避免覆盖
+            img.style.display = '';
+            const svg = avatarDiv.querySelector('svg');
+            if (svg) svg.style.display = 'none';
+          }
+        }
+
+        closeAvatarCrop();
+        showToast('「' + cropMemberName + '」头像已更新', 'success');
+      }
+
+      // ==========================================
+      //  初始化
+      // ==========================================
+      loadAllSavedAvatars();
+      updateAuthUI();
+
+      // 键盘 ESC 关闭模态框
+      document.addEventListener('keydown', (e) => {
+        if(e.key==='Escape') {
+          const cropModal = document.getElementById('avatar-crop-modal');
+          const authModal = document.getElementById('auth-modal');
+          const logoModal = document.getElementById('logo-edit-modal');
+          if(cropModal && !cropModal.classList.contains('hidden')) {
+            closeAvatarCrop();
+          } else if(logoModal && !logoModal.classList.contains('hidden')) {
+            closeLogoEditModal();
+          } else if(authModal && !authModal.classList.contains('hidden')) {
+            closeAuthModal();
+          }
+        }
+      });
+    </script>
+  </body>
+</html></html>
