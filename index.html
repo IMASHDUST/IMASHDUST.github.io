@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>鱿点猫饼 YDMB</title>
-  <!-- CloudBase JS SDK v2.28.8 -->
-  <script src="src/cloudbase-sdk.js?v=2.28.8"></script>
+  <!-- CloudBase + 云函数 v3.0 -->
   <!-- YDMB Cloud Data Layer v5.4 -->
-  <script src="ydmb-cloud.js?v=5.4"></script>
+  <script src="https://static.cloudbase.net/cloudbase-js-sdk/latest/cloudbase.full.js"></script>
+  <script src="js/cloudbase.js"></script>
   <link rel="stylesheet" href="css/tailwind.min.css">
 </head>
 <body>
@@ -15,7 +15,7 @@
     <div class="text-center">
       <h1 class="text-4xl font-bold text-orange-400 mb-4">鱿点猫饼</h1>
       <p class="text-gray-400">YDMB 社区平台</p>
-      <p class="text-sm text-gray-500 mt-4">CloudBase JS SDK v2.28.8 已加载</p>
+      <p class="text-sm text-gray-500 mt-4">CloudBase + 云函数 v3.0 已加载</p>
       <button onclick="window.__ydmbCloud && window.__ydmbCloud.diag && window.__ydmbCloud.diag()"
         class="mt-4 px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700">
         诊断连接

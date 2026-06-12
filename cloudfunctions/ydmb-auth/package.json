@@ -1,0 +1,9 @@
+{
+  "name": "ydmb-auth",
+  "version": "1.0.0",
+  "description": "YDMB 成员账号认证云函数",
+  "main": "index.js",
+  "dependencies": {
+    "@cloudbase/node-sdk": "latest"
+  }
+}
