@@ -1,0 +1,12 @@
+# 鱿点猫饼战队 - 用户登录数据
+# 格式: 用户名,密码,角色
+# admin = 管理员, member = 队员
+# 每行一个用户，以 # 开头的行为注释
+
+星恒,ydmb2024,admin
+尘烬,ydmb2024,member
+拉钩为什么上吊,ydmb2024,member
+大熊吃小熊,ydmb2024,member
+超绝乌萨奇,ydmb2024,member
+我的心好冷,ydmb2024,admin
+泽木桃惠,ydmb2024,member
